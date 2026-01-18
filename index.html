@@ -106,11 +106,13 @@
     }
     .hero .left{ flex:1; }
     .hero .right{
-      width:140px; flex:0 0 140px;
+      width:250px; flex:0 0 250px;
       display:flex; flex-direction:column; gap:10px; align-items:center;
     }
+
+    /* ✅ 放大：统一 220px */
     .badge{
-      width:120px; height:120px;
+      width:220px; height:220px;
       border-radius:999px;
       border:4px solid rgba(255,255,255,.95);
       box-shadow:0 16px 30px rgba(0,0,0,.10);
@@ -200,7 +202,8 @@
     @media (max-width:520px){
       .hero{ flex-direction:column; }
       .hero .right{ width:100%; flex:1; flex-direction:row; justify-content:flex-start; }
-      .badge{ width:96px; height:96px; }
+      /* 手机端也放大一点 */
+      .badge{ width:160px; height:160px; }
     }
   </style>
 </head>
@@ -220,13 +223,12 @@
         <div class="left">
           <h1>测测你更像哪位三丽鸥角色？</h1>
           <div class="sub">
-            回答 20 道小问题，系统会给你一个“主角色”+“隐藏副人格”，并生成可分享链接。<br/>
-            你只要把 12 张图片放到 <b>./images/</b> 文件夹即可。
+            回答 20 道小问题，系统会给你一个“主角色”+“隐藏副人格”，并生成可分享链接。
           </div>
           <div class="divider"></div>
           <button class="btn" onclick="start()">开始测试</button>
           <div class="small">
-            图片命名规则：<code>images/helloKitty.png</code>、<code>images/myMelody.png</code> ……（下面已全部填好）。
+            图片加载路径：<code>./images/xxx.png</code>（你已经上传到仓库 images/ 里即可）
           </div>
         </div>
         <div class="right">
@@ -260,7 +262,8 @@
     <!-- 结果页 -->
     <div id="result" class="card hide center">
       <div class="resultHeader">
-        <div class="badge" style="width:110px;height:110px;">
+        <!-- ✅ 放大结果页头像：220 -->
+        <div class="badge" style="width:220px;height:220px;">
           <img id="rimg" alt="role" />
         </div>
         <div style="text-align:left">
@@ -338,142 +341,58 @@ function setImgSafe(imgEl, src, label){
   imgEl.src = src;
 }
 
-/** ====== 角色库（12个）— 已填好 imageUrl ====== */
+/** ====== 角色库（12个）— ✅ 最终：对应你仓库 images 文件夹的文件名 ====== */
 const roles = {
-  helloKitty: {
-    name: "Hello Kitty",
-    imageUrl: "./images/helloKitty.png",
-    desc: "你给人的第一感觉是稳、体面、可靠。你擅长把生活打理得井井有条，也很会照顾别人的感受：不越界、不强迫，但总能在关键时刻提供支持。你对“规则感”和“秩序感”有天然好感，所以在团队里常常是让事情顺利推进的那个人。你并不是冷淡，而是更倾向于用行动表达温柔。偶尔你会因为太能扛而忽略自己的情绪需求，记得给自己也留出被照顾的空间。",
-    tags: ["可靠稳重","边界感强","审美在线","稳定输出"],
-    hidden: "你的隐藏属性是“安全感制造机”——你一出现，大家就更安心。",
-    bestMatch: "Cinnamoroll（氛围组）或 My Melody（治愈系）",
-    avoid: "最怕：没礼貌、越界、反复无常的人。",
-    recharge: "收拾房间/整理计划、喝热饮、逛文具店或安静做手作。"
-  },
+  helloKitty: { name:"Hello Kitty", imageUrl:"./images/helloKitty.png",
+    desc:"你给人的第一感觉是稳、体面、可靠。你擅长把生活打理得井井有条，也很会照顾别人的感受。",
+    tags:["可靠稳重","边界感强","审美在线","稳定输出"], hidden:"安全感制造机", bestMatch:"Cinnamoroll / My Melody", avoid:"没礼貌、越界", recharge:"整理计划、热饮" },
 
-  myMelody: {
-    name: "My Melody",
-    imageUrl: "./images/myMelody.png",
-    desc: "你是典型的温柔坚定型：外表软软的，但内心有清晰的原则。你很会共情，能敏锐捕捉到别人的情绪波动，所以你总能在关系里扮演“缓冲垫”和“治愈者”。你喜欢小而确定的幸福——好吃的、好看的、好闻的、可爱的，都能让你回血。你愿意为在乎的人付出，但并不等于讨好：一旦触碰底线，你会悄悄拉开距离。",
-    tags: ["治愈系","共情力强","温柔坚定","小幸福收集者"],
-    hidden: "你的隐藏属性是“情绪调音师”——你能把刺耳的氛围调成柔软的和声。",
-    bestMatch: "Hello Kitty（稳定）或 Pompompurin（松弛陪伴）",
-    avoid: "最怕：冷暴力、情绪勒索、忽冷忽热。",
-    recharge: "甜品、香薰/热水澡、和亲近的人慢慢聊天、逛可爱小店。"
-  },
+  myMelody: { name:"My Melody", imageUrl:"./images/myMelody.png",
+    desc:"温柔坚定型：共情力强，能治愈他人，也需要被好好对待。",
+    tags:["治愈系","共情力强","温柔坚定","小幸福"], hidden:"情绪调音师", bestMatch:"Hello Kitty / Pompompurin", avoid:"冷暴力", recharge:"甜品、香薰" },
 
-  kuromi: {
-    name: "Kuromi",
-    imageUrl: "./images/kuromi.png",
-    desc: "你是“酷酷的可爱”本人：有主见、敢表达、行动力强，不喜欢被定义或被管着。你看起来很硬气，甚至会用吐槽和玩笑保护自己，但真正亲近的人会知道你其实很重情义、很细腻。你讨厌无意义的规则，更愿意按自己的节奏活。你的魅力在于真实——你不会假装完美，也不怕承认脆弱。",
-    tags: ["反差萌","嘴硬心软","个性鲜明","行动派"],
-    hidden: "你的隐藏属性是“战斗型浪漫”——你嘴上狠，心里很会爱。",
-    bestMatch: "Badtz-Maru（同频酷）或 Hello Kitty（能稳住你）",
-    avoid: "最怕：控制欲强、道德绑架、PUA式说教。",
-    recharge: "运动/大声唱歌、短途出走、买一件让你变酷的小东西。"
-  },
+  kuromi: { name:"Kuromi", imageUrl:"./images/kuromi.png",
+    desc:"酷酷的可爱：有主见敢表达，嘴硬心软，重情义。",
+    tags:["反差萌","嘴硬心软","个性鲜明","行动派"], hidden:"战斗型浪漫", bestMatch:"Badtz-Maru / Hello Kitty", avoid:"控制欲强", recharge:"运动、短途出走" },
 
-  cinnamoroll: {
-    name: "Cinnamoroll（大耳狗）",
-    imageUrl: "./images/cinnamoroll.png",
-    desc: "你像一朵轻飘飘的云：可爱、友善、很会让氛围变轻松。你天然具备“让人放松”的能力，和你在一起别人会更愿意说真话。你重视陪伴，喜欢温暖的关系和舒服的节奏。你看似随和，其实对“安全感”有很高需求：你可以很外向，也可以突然想躲起来充电。",
-    tags: ["氛围组核心","乐观可爱","需要安全感","社交舒适"],
-    hidden: "你的隐藏属性是“情绪缓冲垫”——你能让很多人卸下防备。",
-    bestMatch: "Hello Kitty（给你稳定）或 Pochacco（一起玩）",
-    avoid: "最怕：吵闹冲突、被忽视、关系不确定。",
-    recharge: "睡饱、抱抱、看轻松综艺/动漫、喝甜咖啡或奶茶。"
-  },
+  cinnamoroll: { name:"Cinnamoroll（大耳狗）", imageUrl:"./images/cinnamoroll.png",
+    desc:"像云朵一样轻松治愈：氛围感强，重视陪伴与安全感。",
+    tags:["氛围组核心","乐观可爱","需要安全感","社交舒适"], hidden:"情绪缓冲垫", bestMatch:"Hello Kitty / Pochacco", avoid:"关系不确定", recharge:"睡饱、抱抱" },
 
-  pompompurin: {
-    name: "Pompompurin（布丁狗）",
-    imageUrl: "./images/pompompurin.png",
-    desc: "你主打一个“松弛感”和“好相处”。你喜欢舒服的生活方式：好吃的、好睡的、好玩的，能享受也懂得分享。你在关系里很包容，擅长用轻松幽默化解尴尬，是大家都愿意靠近的“软绵绵存在”。你对压力的处理方式是：先把自己照顾好，再慢慢解决问题。",
-    tags: ["松弛感","好相处","享受生活","温和幽默"],
-    hidden: "你的隐藏属性是“快乐扩散器”——你走到哪，哪里就更轻松。",
-    bestMatch: "My Melody（温柔互补）或 Cinnamoroll（双倍治愈）",
-    avoid: "最怕：高压逼迫、无休止争论、过度较真。",
-    recharge: "好好吃一顿、午睡、散步晒太阳、抱着枕头发呆。"
-  },
+  pompompurin: { name:"Pompompurin（布丁狗）", imageUrl:"./images/pompompurin.png",
+    desc:"松弛感王者：好相处、懂享受，能把压力变温柔。",
+    tags:["松弛感","好相处","享受生活","温和幽默"], hidden:"快乐扩散器", bestMatch:"My Melody / Cinnamoroll", avoid:"高压逼迫", recharge:"好好吃一顿、午睡" },
 
-  pochacco: {
-    name: "Pochacco（帕恰狗）",
-    imageUrl: "./images/pochacco.png",
-    desc: "你是活力派：爱玩、好奇心强、社交起来很自然。你喜欢新鲜事物，也很愿意带动身边的人一起体验生活。你其实很讲义气，对朋友很真诚，属于“我来我来我顶上”的类型。你不喜欢沉闷的环境，如果太压抑你会想办法把气氛带起来。",
-    tags: ["活力值高","真诚仗义","爱探索","气氛担当"],
-    hidden: "你的隐藏属性是“超强带动性”——你能让身边人都更愿意行动。",
-    bestMatch: "Cinnamoroll（陪你玩）或 Keroppi（一起冒险）",
-    avoid: "最怕：拖拖拉拉、扫兴、否定你的热情。",
-    recharge: "运动、约朋友、玩游戏、尝试新餐厅或新路线。"
-  },
+  pochacco: { name:"Pochacco（帕恰狗）", imageUrl:"./images/pochacco.png",
+    desc:"活力派：爱探索、真诚仗义，能带动朋友一起行动。",
+    tags:["活力值高","真诚仗义","爱探索","气氛担当"], hidden:"超强带动性", bestMatch:"Cinnamoroll / Keroppi", avoid:"扫兴", recharge:"运动、约朋友" },
 
-  keroppi: {
-    name: "Keroppi（可洛比/青蛙）",
-    imageUrl: "./images/keroppi.png",
-    desc: "你是乐天行动型：能把小事变有趣，也能把困难当成挑战。你对世界保持好奇，喜欢在生活里找“通关感”。你在群体里通常是组织者或点子王：说走就走，说干就干。你讨厌把问题想得太复杂，更相信先做起来。",
-    tags: ["乐天派","行动力","点子多","复原力强"],
-    hidden: "你的隐藏属性是“困难消化器”——你能把压力变成游戏关卡。",
-    bestMatch: "Pochacco（双倍活力）或 Hello Kitty（帮你收尾细节）",
-    avoid: "最怕：过度悲观、过度控制、一直说不行。",
-    recharge: "户外、音乐、运动、和朋友做点“很无聊但很快乐”的事。"
-  },
+  keroppi: { name:"Keroppi（可洛比）", imageUrl:"./images/keroppi.png",
+    desc:"乐天行动型：点子多，复原力强，把困难当关卡。",
+    tags:["乐天派","行动力","点子多","复原力强"], hidden:"困难消化器", bestMatch:"Pochacco / Hello Kitty", avoid:"过度悲观", recharge:"户外、音乐" },
 
-  badtzMaru: {
-    name: "Badtz-Maru（酷企鹅）",
-    imageUrl: "./images/badtzMaru.png",
-    desc: "你酷得很有态度：不爱迎合，讨厌虚伪，更看重真实和效率。你有强烈的独立性，喜欢按自己的逻辑做事。你对“无意义的社交”和“无效沟通”耐心有限，常常一针见血。你看起来有点难靠近，但熟了会发现你很讲义气、很护短，也很有冷冷的幽默感。",
-    tags: ["独立清醒","毒舌但真诚","效率派","酷感审美"],
-    hidden: "你的隐藏属性是“反套路智者”——你总能看穿事情的本质。",
-    bestMatch: "Kuromi（同频输出）或 Hello Kitty（把锋芒变高级）",
-    avoid: "最怕：道德绑架、假大空、低效扯皮。",
-    recharge: "一个人待着、听歌、打游戏、做自己喜欢的冷门爱好。"
-  },
+  badtzMaru: { name:"Badtz-Maru（酷企鹅）", imageUrl:"./images/badtzMaru.png",
+    desc:"独立清醒：不爱迎合，效率派，真诚又护短。",
+    tags:["独立清醒","毒舌真诚","效率派","酷感审美"], hidden:"反套路智者", bestMatch:"Kuromi / Hello Kitty", avoid:"低效扯皮", recharge:"独处、听歌" },
 
-  littleTwinStars: {
-    name: "Little Twin Stars（双子星）",
-    imageUrl: "./images/littleTwinStars.png",
-    desc: "你浪漫、想象力丰富，对美和梦境有天然感知。你很容易被一首歌、一段光影、一个小细节打动。你不喜欢太现实的压迫感，更愿意相信“温柔的可能性”。你在关系里需要理解和共鸣：能一起做梦，也能一起落地。你的优势是创造力与审美：你能把普通日子过出童话感。",
-    tags: ["浪漫主义","想象力","审美感强","温柔细腻"],
-    hidden: "你的隐藏属性是“灵感捕手”——你总能把平凡变成好看的故事。",
-    bestMatch: "My Melody（温柔共鸣）或 Hello Kitty（帮你落地执行）",
-    avoid: "最怕：粗暴现实、嘲笑梦想、情绪压迫。",
-    recharge: "听歌、看展/看星空、写点东西、整理灵感相册。"
-  },
+  littleTwinStars: { name:"Little Twin Stars（双子星）", imageUrl:"./images/littleTwinStars.png",
+    desc:"浪漫与想象力：审美强，爱把日子过成童话。",
+    tags:["浪漫主义","想象力","审美强","温柔细腻"], hidden:"灵感捕手", bestMatch:"My Melody / Hello Kitty", avoid:"嘲笑梦想", recharge:"听歌、看展" },
 
-  gudetama: {
-    name: "Gudetama（蛋黄哥）",
-    imageUrl: "./images/gudetama.png",
-    desc: "你表面摆烂，内心清醒。你对“无意义的努力”极度敏感：更愿意把力气用在真正值得的地方。你擅长把复杂问题一句话讲明白，也很会用幽默化解尴尬。你需要充足的休息与自由空间，一旦被逼得太紧，你会直接关机。选择省电不是懒，而是一种能量管理。",
-    tags: ["省电模式","清醒吐槽","怕麻烦","高效率"],
-    hidden: "你的隐藏属性是“能量管理大师”——你知道什么时候该用力、什么时候该停。",
-    bestMatch: "Pompompurin（一起松弛）或 Hello Kitty（帮你规划不内耗）",
-    avoid: "最怕：无意义加班、情绪绑架、被催促。",
-    recharge: "睡觉、发呆、漫画/短视频、把待办清空只留一件事。"
-  },
+  gudetama: { name:"Gudetama（蛋黄哥）", imageUrl:"./images/gudetama.png",
+    desc:"省电清醒：拒绝无意义努力，擅长能量管理。",
+    tags:["省电模式","清醒吐槽","怕麻烦","高效率"], hidden:"能量管理大师", bestMatch:"Pompompurin / Hello Kitty", avoid:"被催促", recharge:"睡觉、发呆" },
 
-  hangyodon: {
-    name: "Hangyodon（半鱼人）",
-    imageUrl: "./images/hangyodon.png",
-    desc: "你是“搞笑外壳+敏感内核”的代表。你喜欢热闹，也擅长制造笑点，但其实很在意别人是否喜欢你。你对氛围很敏感，常常一秒读懂场上的微妙。你会用玩笑掩饰不安，也会在深夜突然多想。你的闪光点是：真诚、有趣、共情力强，而且很愿意为朋友两肋插刀。",
-    tags: ["搞笑担当","敏感细腻","反差感","共情力强"],
-    hidden: "你的隐藏属性是“氛围雷达”——你能瞬间察觉别人情绪。",
-    bestMatch: "Cinnamoroll（温柔接住你）或 My Melody（懂你）",
-    avoid: "最怕：被嘲笑、被忽视、被当成只会搞笑的人。",
-    recharge: "和懂你的人聊天、看喜剧、写点心事、吃点热乎的。"
-  },
+  hangyodon: { name:"Hangyodon（半鱼人）", imageUrl:"./images/hangyodon.png",
+    desc:"搞笑外壳敏感内核：氛围雷达，真诚又共情。",
+    tags:["搞笑担当","敏感细腻","反差感","共情强"], hidden:"氛围雷达", bestMatch:"Cinnamoroll / My Melody", avoid:"被忽视", recharge:"喜剧、热乎的" },
 
-  tuxedosam: {
-    name: "Tuxedosam（企鹅山姆）",
-    imageUrl: "./images/tuxedosam.png",
-    desc: "你有一种“讲究但不矫情”的精致感：重视品质、礼仪和氛围，也希望自己活得体面漂亮。你喜欢可爱和优雅并存的东西，对审美很挑，但你的挑剔是为了更舒服的生活体验。你社交时很会照顾场面，懂得让所有人都不尴尬。你偶尔会有点爱面子，但其实很柔软。",
-    tags: ["精致讲究","礼貌体面","审美挑剔","氛围控"],
-    hidden: "你的隐藏属性是“场面调度者”——你能把聚会变得高级且舒服。",
-    bestMatch: "Hello Kitty（同频体面）或 Little Twin Stars（一起美学）",
-    avoid: "最怕：粗糙敷衍、没分寸、破坏氛围。",
-    recharge: "整理穿搭/房间、逛审美店、喝咖啡、做点仪式感小事。"
-  }
+  tuxedosam: { name:"Tuxedosam（企鹅山姆）", imageUrl:"./images/tuxedosam.png",
+    desc:"精致讲究：礼貌体面，审美挑剔但不矫情。",
+    tags:["精致讲究","礼貌体面","审美挑剔","氛围控"], hidden:"场面调度者", bestMatch:"Hello Kitty / Twin Stars", avoid:"粗糙敷衍", recharge:"咖啡、仪式感" }
 };
 
-/** ====== 20题题库（每题4选项加权） ====== */
+/** ====== 20题题库（与你原来一致） ====== */
 const questions = [
   { q:"周末更想怎么过？", opts:[
     { t:"宅家追剧+点甜品，舒服最重要", score:{ gudetama:2, pompompurin:2, cinnamoroll:1 }},
@@ -601,15 +520,9 @@ const questions = [
 let idx = 0;
 let answers = Array(questions.length).fill(null);
 let scores = {};
-
-/** ====== 图片 key 列表（用于随机预览） ====== */
 const roleKeys = Object.keys(roles);
 
-function resetScores(){
-  scores = {};
-  roleKeys.forEach(k => scores[k] = 0);
-}
-
+function resetScores(){ scores={}; roleKeys.forEach(k=>scores[k]=0); }
 function initPreview(){
   const pick = roleKeys[Math.floor(Math.random() * roleKeys.length)];
   setImgSafe(document.getElementById("previewImg"), roles[pick].imageUrl, pick.toUpperCase().slice(0,3));
@@ -619,7 +532,7 @@ function start(){
   document.getElementById('home').classList.add('hide');
   document.getElementById('quiz').classList.remove('hide');
   document.getElementById('result').classList.add('hide');
-  idx = 0;
+  idx=0;
   answers = Array(questions.length).fill(null);
   resetScores();
   render();
@@ -645,17 +558,8 @@ function render(){
   });
 }
 
-function choose(i){
-  answers[idx] = i;
-  render();
-}
-
-function prev(){
-  if(idx > 0){
-    idx--;
-    render();
-  }
-}
+function choose(i){ answers[idx]=i; render(); }
+function prev(){ if(idx>0){ idx--; render(); } }
 
 function next(){
   if(answers[idx] === null){
@@ -730,7 +634,6 @@ function showResult(mainKeyOverride=null, subKeyOverride=null){
 
   const role = roles[mainKey];
   document.getElementById('rname').innerText = role.name;
-
   setImgSafe(document.getElementById('rimg'), role.imageUrl, mainKey.toUpperCase().slice(0,3));
 
   document.getElementById('rdesc').innerText = role.desc;
@@ -833,4 +736,3 @@ window.addEventListener('hashchange', ()=>{
 </script>
 </body>
 </html>
-
