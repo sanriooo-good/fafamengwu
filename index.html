@@ -57,8 +57,7 @@
       <div class="sub">回答几个小问题，看看你更像哪位三丽鸥角色～（支持生成分享链接）</div>
       <div style="height:14px"></div>
       <button class="btn" onclick="start()">开始测试</button>
-      <div class="small">提示：如果你想做成“像你给的那个链接”一样，我也可以把结果页做成更炫的海报式分享图。</div>
-    </div>
+  
 
     <!-- 题目页 -->
     <div id="quiz" class="card hide">
@@ -94,113 +93,245 @@
 <script>
 /** 角色库：你可以换成三丽鸥的官方图/自制图 */
 const roles = {
-  kitty: {
+  helloKitty: {
     name: "Hello Kitty",
-    img: "https://images.unsplash.com/photo-1543852786-1cf6624b9987?w=400&q=80", // 占位图：换成你想用的
-    desc: "你温柔、体面、有边界感。你不一定最吵闹，但你很可靠，常常是朋友的“定海神针”。",
-    tags: ["温柔稳重", "体贴", "审美在线", "人缘很好"]
+    desc: "你给人的第一感觉是稳、体面、可靠。你擅长把生活打理得井井有条，也很会照顾别人的感受：不越界、不强迫，但总能在关键时刻提供支持。你对“规则感”和“秩序感”有天然好感，所以在团队里常常是让事情顺利推进的那个人。你并不是冷淡，而是更倾向于用行动表达温柔。你对自己也有要求：希望自己保持得体、保持节奏、保持可爱但不幼稚。偶尔你会因为太能扛而忽略自己的情绪需求，记得给自己也留出被照顾的空间。",
+    tags: ["可靠稳重", "边界感强", "审美在线", "稳定输出"],
+    hidden: "你的隐藏属性是“安全感制造机”——你一出现，大家就更安心。",
+    bestMatch: "Cinnamoroll（氛围组）或 My Melody（治愈系）",
+    avoid: "最怕：没礼貌、越界、反复无常的人。",
+    recharge: "收拾房间/整理计划、喝热饮、逛文具店或安静地做手作。"
   },
-  mymelody: {
+
+  myMelody: {
     name: "My Melody",
-    img: "https://images.unsplash.com/photo-1518791841217-8f162f1e1131?w=400&q=80",
-    desc: "你柔软又有韧性，愿意照顾身边人的感受。你看起来好说话，但其实很有原则。",
-    tags: ["治愈系", "共情力强", "小幸福收集者", "善良但不软弱"]
+    desc: "你是典型的温柔坚定型：外表软软的，但内心有清晰的原则。你很会共情，能敏锐捕捉到别人的情绪波动，所以你总能在关系里扮演“缓冲垫”和“治愈者”。你喜欢小而确定的幸福——好吃的、好看的、好闻的、可爱的，都能让你回血。你在意关系的温度，也愿意为在乎的人付出，但你并不等于“讨好型”：一旦触碰底线，你会悄悄拉开距离。你最需要的是被尊重、被理解，以及被温柔对待。",
+    tags: ["治愈系", "共情力强", "温柔坚定", "小幸福收集者"],
+    hidden: "你的隐藏属性是“情绪调音师”——你能把刺耳的氛围调成柔软的和声。",
+    bestMatch: "Hello Kitty（稳定）或 Pompompurin（松弛陪伴）",
+    avoid: "最怕：冷暴力、情绪勒索、忽冷忽热。",
+    recharge: "甜品、香薰/热水澡、和亲近的人慢慢聊天、逛可爱小店。"
   },
+
   kuromi: {
     name: "Kuromi",
-    img: "https://images.unsplash.com/photo-1546182990-dffeafbe841d?w=400&q=80",
-    desc: "你有主见、敢表达，喜欢“酷酷的可爱”。外表强势但内心细腻，爱憎分明超真实。",
-    tags: ["反差萌", "嘴硬心软", "行动派", "很会自嘲"]
+    desc: "你是“酷酷的可爱”本人：有主见、敢表达、行动力强，不喜欢被定义或被管着。你看起来很硬气，甚至会用吐槽和玩笑保护自己，但真正亲近的人会知道你其实很重情义、很细腻。你讨厌无意义的规则，更愿意按自己的节奏活。你也很有野心：想赢、想变强、想把生活过得漂亮又爽快。你的魅力在于真实——你不会假装完美，也不怕承认脆弱。",
+    tags: ["反差萌", "嘴硬心软", "个性鲜明", "行动派"],
+    hidden: "你的隐藏属性是“战斗型浪漫”——你嘴上狠，心里很会爱。",
+    bestMatch: "Badtz-Maru（同频酷）或 Hello Kitty（能稳住你）",
+    avoid: "最怕：控制欲强、道德绑架、PUA式说教。",
+    recharge: "运动/大声唱歌、短途出走、买一件让你变酷的小东西。"
   },
+
   cinnamoroll: {
-    name: "Cinnamoroll",
-    img: "https://images.unsplash.com/photo-1537151625747-768eb6cf92b2?w=400&q=80",
-    desc: "你像一朵软云：很会让氛围变轻松。你重视陪伴，适合在温暖的关系里发光。",
-    tags: ["软萌", "乐观", "需要安全感", "气氛组核心"]
+    name: "Cinnamoroll（大耳狗）",
+    desc: "你像一朵轻飘飘的云：可爱、友善、很会让氛围变轻松。你天然具备“让人放松”的能力，和你在一起别人会更愿意说真话。你重视陪伴，喜欢温暖的关系和舒服的节奏。你看似随和，其实对“安全感”有很高需求：你可以很外向，也可以突然想躲起来充电。你不喜欢冲突，但你不是没脾气，只是更倾向于用温柔的方式解决问题。",
+    tags: ["氛围组核心", "乐观可爱", "需要安全感", "社交舒适"],
+    hidden: "你的隐藏属性是“情绪缓冲垫”——你能让很多人卸下防备。",
+    bestMatch: "Hello Kitty（给你稳定）或 Pochacco（一起玩）",
+    avoid: "最怕：吵闹冲突、被忽视、关系不确定。",
+    recharge: "睡饱、抱抱、看轻松综艺/动漫、喝甜咖啡或奶茶。"
   },
+
+  pompompurin: {
+    name: "Pompompurin（布丁狗）",
+    desc: "你主打一个“松弛感”和“好相处”。你喜欢舒服的生活方式：好吃的、好睡的、好玩的，能享受也懂得分享。你在关系里很包容，擅长用轻松幽默化解尴尬，是大家都愿意靠近的“软绵绵存在”。你对压力的处理方式是：先把自己照顾好，再慢慢解决问题。你不爱内耗，但如果被逼得太紧，你也会突然摆烂或逃离。总体来说，你的可贵在于：你能把日子过得可爱又不紧绷。",
+    tags: ["松弛感", "好相处", "享受生活", "温和幽默"],
+    hidden: "你的隐藏属性是“快乐扩散器”——你走到哪，哪里就更轻松。",
+    bestMatch: "My Melody（温柔互补）或 Cinnamoroll（双倍治愈）",
+    avoid: "最怕：高压逼迫、无休止争论、过度较真。",
+    recharge: "好好吃一顿、午睡、散步晒太阳、抱着枕头发呆。"
+  },
+
+  pochacco: {
+    name: "Pochacco（帕恰狗）",
+    desc: "你是活力派：爱玩、好奇心强、社交起来很自然。你喜欢新鲜事物，也很愿意带动身边的人一起体验生活。你其实很讲义气，对朋友很真诚，属于“我来我来我顶上”的类型。你不喜欢沉闷的环境，如果太压抑你会想办法把气氛带起来。你的成长课题是：别把所有事情都揽在身上，学会把精力花在真正重要的人和事上。",
+    tags: ["活力值高", "真诚仗义", "爱探索", "气氛担当"],
+    hidden: "你的隐藏属性是“超强带动性”——你能让身边人都更愿意行动。",
+    bestMatch: "Cinnamoroll（陪你玩）或 Keroppi（一起冒险）",
+    avoid: "最怕：拖拖拉拉、扫兴、否定你的热情。",
+    recharge: "运动、约朋友、玩游戏、尝试新餐厅或新路线。"
+  },
+
+  keroppi: {
+    name: "Keroppi（可洛比/青蛙）",
+    desc: "你是乐天行动型：能把小事变有趣，也能把困难当成挑战。你对世界保持好奇，喜欢在生活里找“通关感”。你在群体里通常是组织者或点子王：说走就走，说干就干。你讨厌把问题想得太复杂，更相信先做起来。偶尔你会因为太乐观而忽略细节，但你的优势是：强韧、能复原、很少被打倒。",
+    tags: ["乐天派", "行动力", "点子多", "复原力强"],
+    hidden: "你的隐藏属性是“困难消化器”——你能把压力变成游戏关卡。",
+    bestMatch: "Pochacco（双倍活力）或 Hello Kitty（帮你收尾细节）",
+    avoid: "最怕：过度悲观、过度控制、一直说不行。",
+    recharge: "户外、音乐、运动、和朋友做点“很无聊但很快乐”的事。"
+  },
+
+  badtzMaru: {
+    name: "Badtz-Maru（酷企鹅）",
+    desc: "你酷得很有态度：不爱迎合，讨厌虚伪，更看重真实和效率。你有强烈的独立性，喜欢按自己的逻辑做事。你对“无意义的社交”和“无效沟通”耐心有限，常常一针见血。你看起来有点难靠近，但熟了会发现你很讲义气、很护短，也很有幽默感（那种冷冷的幽默）。你不怕与众不同，甚至享受“我就是我”的感觉。",
+    tags: ["独立清醒", "毒舌但真诚", "效率派", "酷感审美"],
+    hidden: "你的隐藏属性是“反套路智者”——你总能看穿事情的本质。",
+    bestMatch: "Kuromi（同频输出）或 Hello Kitty（帮你把锋芒变高级）",
+    avoid: "最怕：道德绑架、假大空、低效扯皮。",
+    recharge: "一个人待着、听歌、打游戏、做自己喜欢的“冷门爱好”。"
+  },
+
+  littleTwinStars: {
+    name: "Little Twin Stars（双子星）",
+    desc: "你浪漫、想象力丰富，对美和梦境有天然感知。你很容易被一首歌、一段光影、一个小细节打动。你不喜欢太现实的压迫感，更愿意相信“温柔的可能性”。你在关系里需要的是理解和共鸣：能一起做梦，也能一起落地。你有时会犹豫或拖延，因为你希望一切都更完美、更梦幻。你的优势是：创造力、审美与灵感——你能把普通日子过出童话感。",
+    tags: ["浪漫主义", "想象力", "审美感强", "温柔细腻"],
+    hidden: "你的隐藏属性是“灵感捕手”——你总能把平凡变成好看的故事。",
+    bestMatch: "My Melody（温柔共鸣）或 Hello Kitty（帮你落地执行）",
+    avoid: "最怕：粗暴现实、嘲笑梦想、情绪压迫。",
+    recharge: "听歌、看展/看星空、写点东西、整理灵感相册。"
+  },
+
   gudetama: {
-    name: "Gudetama",
-    img: "https://images.unsplash.com/photo-1543852786-1cf6624b9987?w=400&q=80",
-    desc: "你表面摆烂，内心清醒。你对世界的洞察很准，只是不想浪费力气在无意义的事情上。",
-    tags: ["摆烂哲学", "清醒", "怕麻烦", "效率至上"]
+    name: "Gudetama（蛋黄哥）",
+    desc: "你表面摆烂，内心清醒。你并不是没有目标，而是对“无意义的努力”极度敏感：你更愿意把力气用在真正值得的地方。你擅长把复杂问题一句话讲明白，也很会用幽默化解尴尬。你需要充足的休息与自由空间，一旦被逼得太紧，你会直接关机。你其实很有自我保护意识：选择省电，是为了更长久地运转。学会的是：不要把所有疲惫都当成懒，你可能只是需要更好的节奏。",
+    tags: ["省电模式", "清醒吐槽", "怕麻烦", "高效率"],
+    hidden: "你的隐藏属性是“能量管理大师”——你知道什么时候该用力、什么时候该停。",
+    bestMatch: "Pompompurin（一起松弛）或 Hello Kitty（帮你规划不内耗）",
+    avoid: "最怕：无意义加班、情绪绑架、被催促。",
+    recharge: "睡觉、发呆、短视频/漫画、把待办清空只留一件事。"
+  },
+
+  hangyodon: {
+    name: "Hangyodon（半鱼人）",
+    desc: "你是“搞笑外壳+敏感内核”的代表。你喜欢热闹，也擅长制造笑点，但其实你很在意别人是否喜欢你。你对氛围很敏感，常常一秒读懂场上的微妙。你会用玩笑掩饰不安，也会在深夜突然多想。你的闪光点是：真诚、有趣、共情力强，而且你很愿意为朋友两肋插刀。你需要的是：被接住、被肯定，以及一个不用强撑的环境。",
+    tags: ["搞笑担当", "敏感细腻", "反差感", "共情力强"],
+    hidden: "你的隐藏属性是“氛围雷达”——你能瞬间察觉别人情绪。",
+    bestMatch: "Cinnamoroll（温柔接住你）或 My Melody（懂你）",
+    avoid: "最怕：被嘲笑、被忽视、被当成“只会搞笑的人”。",
+    recharge: "和懂你的人聊天、看喜剧、写点心事、吃点热乎的。"
+  },
+
+  tuxedosam: {
+    name: "Tuxedosam（企鹅山姆）",
+    desc: "你有一种“讲究但不矫情”的精致感：重视品质、礼仪和氛围，也希望自己活得体面漂亮。你喜欢可爱和优雅并存的东西，对审美很挑，但你的挑剔是为了更舒服的生活体验。你社交时很会照顾场面，懂得让所有人都不尴尬。你偶尔会有点爱面子或不想示弱，但你其实很柔软——只是不想把脆弱随便给别人看。",
+    tags: ["精致讲究", "礼貌体面", "审美挑剔", "氛围控"],
+    hidden: "你的隐藏属性是“场面调度者”——你能把聚会变得高级且舒服。",
+    bestMatch: "Hello Kitty（同频体面）或 Little Twin Stars（一起美学）",
+    avoid: "最怕：粗糙敷衍、没分寸、破坏氛围。",
+    recharge: "整理穿搭/房间、逛审美店、喝咖啡、做点仪式感的小事。"
   }
 };
 
-/** 题目库（示例 8 题） */
+
+/** 题目库（20 题） */
 const questions = [
   {
-    q: "周末最想做什么？",
+    q: "周末更想怎么过？",
     opts: [
-      { t:"宅家追剧+点甜品", score:{ cinnamoroll:2, gudetama:2, mymelody:1 }},
-      { t:"逛街拍照买可爱物", score:{ kitty:2, mymelody:2 }},
-      { t:"去密室/展览/新奇体验", score:{ kuromi:2, kitty:1 }},
-      { t:"都行，看心情", score:{ gudetama:2, cinnamoroll:1 }}
+      { t:"宅家追剧+点甜品，舒服最重要", score:{ gudetama:2, pompompurin:2, cinnamoroll:1 }},
+      { t:"收拾房间/做计划，把生活整理好", score:{ helloKitty:2, tuxedosam:1 }},
+      { t:"出去玩！新餐厅/新路线/新活动", score:{ pochacco:2, keroppi:2 }},
+      { t:"去看展/拍照/找灵感，慢慢逛", score:{ littleTwinStars:2, myMelody:1, tuxedosam:1 }}
     ]
   },
   {
-    q: "朋友突然约你出门，你：",
+    q: "朋友临时约你出门，你：",
     opts: [
-      { t:"立刻答应：走！", score:{ kuromi:2, cinnamoroll:1 }},
-      { t:"先看日程再决定", score:{ kitty:2 }},
-      { t:"想去，但会纠结要不要出门", score:{ mymelody:2 }},
-      { t:"能线上就线上吧", score:{ gudetama:2 }}
+      { t:"看心情，今天电量够就去", score:{ gudetama:2, hangyodon:1 }},
+      { t:"立刻答应：走！", score:{ pochacco:2, keroppi:1, cinnamoroll:1 }},
+      { t:"先确认时间地点细节再决定", score:{ helloKitty:2, tuxedosam:1 }},
+      { t:"嘴上嫌麻烦，但最后还是会去", score:{ badtzMaru:2, kuromi:1, hangyodon:1 }}
     ]
   },
   {
-    q: "你最在意别人怎么评价你？",
+    q: "你最受不了哪种人？",
     opts: [
-      { t:"可靠、有分寸", score:{ kitty:2 }},
-      { t:"可爱、温柔", score:{ mymelody:2, cinnamoroll:1 }},
-      { t:"有个性、不随波逐流", score:{ kuromi:2 }},
-      { t:"别烦我，我挺好的", score:{ gudetama:2 }}
+      { t:"没礼貌/越界/不尊重别人", score:{ helloKitty:2, tuxedosam:1 }},
+      { t:"控制欲强、道德绑架、爱说教", score:{ kuromi:2, badtzMaru:2 }},
+      { t:"忽冷忽热、冷暴力、不回应", score:{ myMelody:2, cinnamoroll:1, hangyodon:1 }},
+      { t:"低效扯皮、无意义内耗", score:{ gudetama:2, badtzMaru:1 }}
     ]
   },
   {
-    q: "压力大时你会：",
+    q: "压力大时你更像：",
     opts: [
-      { t:"制定计划，逐个解决", score:{ kitty:2 }},
-      { t:"找人聊聊，想要被安慰", score:{ mymelody:2 }},
-      { t:"先冲一波再说", score:{ kuromi:2 }},
-      { t:"先躺会儿，等恢复", score:{ gudetama:2, cinnamoroll:1 }}
+      { t:"先把计划列出来，逐个解决", score:{ helloKitty:2, tuxedosam:1 }},
+      { t:"找人聊聊，需要被安慰一下", score:{ myMelody:2, hangyodon:1 }},
+      { t:"先冲一波，把问题狠狠干掉", score:{ kuromi:2, keroppi:1 }},
+      { t:"先躺会儿，等电量恢复再说", score:{ gudetama:2, pompompurin:1 }}
     ]
   },
   {
-    q: "你最擅长的社交方式：",
+    q: "你在朋友群里通常负责：",
     opts: [
-      { t:"倾听+照顾情绪", score:{ mymelody:2 }},
-      { t:"维持礼貌距离", score:{ kitty:2 }},
-      { t:"搞笑活跃气氛", score:{ cinnamoroll:2 }},
-      { t:"毒舌吐槽但很真诚", score:{ kuromi:2 }}
+      { t:"定计划/控节奏/把事情推进", score:{ helloKitty:2 }},
+      { t:"活跃气氛/讲笑话/缓解尴尬", score:{ cinnamoroll:2, hangyodon:2 }},
+      { t:"提出新点子/拉大家去冒险", score:{ keroppi:2, pochacco:1 }},
+      { t:"吐槽输出/指出不合理/当清醒的人", score:{ badtzMaru:2, kuromi:1, gudetama:1 }}
     ]
   },
   {
-    q: "你对生活的态度更像：",
+    q: "你更在意别人怎么看你？",
     opts: [
-      { t:"努力把日子过得漂亮", score:{ kitty:2 }},
-      { t:"小而确定的幸福最重要", score:{ mymelody:2 }},
-      { t:"想怎样就怎样，爽最重要", score:{ kuromi:2 }},
-      { t:"别太认真，开心就好", score:{ gudetama:2, cinnamoroll:1 }}
+      { t:"可靠、有分寸、让人放心", score:{ helloKitty:2, tuxedosam:1 }},
+      { t:"可爱、温柔、好相处", score:{ myMelody:2, cinnamoroll:1, pompompurin:1 }},
+      { t:"有个性、不随波逐流", score:{ kuromi:2, badtzMaru:1 }},
+      { t:"别烦我，我只想省点力", score:{ gudetama:2 }}
     ]
   },
   {
-    q: "你最受不了：",
+    q: "如果必须加班，你会：",
     opts: [
-      { t:"没礼貌/越界的人", score:{ kitty:2 }},
-      { t:"争吵和冷漠", score:{ mymelody:2 }},
-      { t:"被管着做事", score:{ kuromi:2 }},
-      { t:"无意义的加班与内耗", score:{ gudetama:2 }}
+      { t:"先安排流程，提高效率，早点结束", score:{ badtzMaru:2, helloKitty:1, gudetama:1 }},
+      { t:"默默做完，但会照顾好大家情绪", score:{ myMelody:2, helloKitty:1 }},
+      { t:"情绪上头：为什么要加班！但还是会搞定", score:{ kuromi:2, hangyodon:1 }},
+      { t:"能拖就拖，能省就省，绝不硬扛", score:{ gudetama:2, pompompurin:1 }}
     ]
   },
   {
-    q: "如果给自己一句tag：",
+    q: "你对“仪式感”的态度：",
     opts: [
-      { t:"#稳定输出", score:{ kitty:2 }},
-      { t:"#温柔坚定", score:{ mymelody:2 }},
-      { t:"#酷但可爱", score:{ kuromi:2 }},
-      { t:"#省电模式", score:{ gudetama:2 }}
+      { t:"很重要！生活要过得漂亮", score:{ tuxedosam:2, helloKitty:1, littleTwinStars:1 }},
+      { t:"可有可无，但可爱就加分", score:{ myMelody:2, cinnamoroll:1 }},
+      { t:"我只要舒服省事就行", score:{ gudetama:2, pompompurin:1 }},
+      { t:"看心情，想酷的时候就来一套", score:{ kuromi:2, badtzMaru:1 }}
     ]
-  }
-];
+  },
+  {
+    q: "你更像哪种恋爱/关系模式？",
+    opts: [
+      { t:"稳稳的陪伴型，细水长流", score:{ helloKitty:2, pompompurin:1 }},
+      { t:"温柔黏人一点，需要回应和确认", score:{ myMelody:2, cinnamoroll:1 }},
+      { t:"又甜又酷，嘴硬心软但很护短", score:{ kuromi:2, hangyodon:1 }},
+      { t:"保持空间，别太黏，轻松就好", score:{ gudetama:2, badtzMaru:1 }}
+    ]
+  },
+  {
+    q: "看到别人难过，你通常：",
+    opts: [
+      { t:"先陪着，听完再安慰", score:{ myMelody:2, cinnamoroll:1 }},
+      { t:"给出可执行的解决方案", score:{ helloKitty:2, badtzMaru:1 }},
+      { t:"用搞笑把人逗笑，让气氛轻一点", score:{ hangyodon:2, pochacco:1 }},
+      { t:"表面冷，但会偷偷帮忙", score:{ badtzMaru:2, kuromi:1 }}
+    ]
+  },
+  {
+    q: "你做决定更偏向：",
+    opts: [
+      { t:"理性权衡：利弊/风险/时间", score:{ helloKitty:2, badtzMaru:1 }},
+      { t:"凭直觉：我觉得这样更对", score:{ kuromi:2, keroppi:1 }},
+      { t:"考虑他人感受：别让人尴尬或受伤", score:{ myMelody:2, tuxedosam:1 }},
+      { t:"能不决定就不决定，先放着", score:{ gudetama:2, littleTwinStars:1 }}
+    ]
+  },
+  {
+    q: "你最喜欢的夸奖是：",
+    opts: [
+      { t:"你真的很靠谱", score:{ helloKitty:2 }},
+      { t:"和你在一起很舒服/被治愈", score:{ cinnamoroll:2, myMelody:2, pompompurin:1 }},
+      { t:"你真的很酷/很有个性", score:{ kuromi:2, badtzMaru:1 }},
+      { t:"你太会生活/太有品味了", score:{ tuxedosam:2, littleTwinStars:1 }}
+    ]
+  },
+  {
+    q: "你更像哪种“社交电量”？",
+    opts: [
+      { t:"社交会消耗我，得经常独处充电", score:{ gudetama:2, badtzMaru:1, littleTwinStars:1 }},
+      { t:"有熟人就很放松，陌生人会紧张", score:{ myMelody:2, hangyodon:1 }},
+      { t:"越热闹越兴奋，我能带动全场", score:{ pochacco:2,
+
 
 let idx = 0;
 let answers = Array(questions.length).fill(null);
@@ -253,6 +384,14 @@ function next(){
   }else{
     calc();
     showResult();
+    const max = Math.max(...Object.values(scores));
+const tied = Object.keys(scores).filter(k => scores[k] === max);
+const bestKey = tied[Math.floor(Math.random() * tied.length)];
+
+    const sorted = Object.keys(scores).sort((a,b)=>scores[b]-scores[a]);
+const mainKey = sorted[0];
+const subKey  = sorted[1];
+
   }
 }
 
@@ -328,3 +467,4 @@ window.addEventListener('load', ()=>{
 </script>
 </body>
 </html>
+
