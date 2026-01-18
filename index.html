@@ -590,18 +590,23 @@ let answers = Array(questions.length).fill(null);
 let scores = {};
 let roleImgs = {};
 
-/** ✅ 自动路径：先 images/，失败就回退同目录 */
-function setImgWithFallback(imgEl, fileName){
-  const p1 = `images/${fileName}`;
-  const p2 = fileName;
-  imgEl.onerror = function(){
-    if(imgEl.src.includes("/images/") || imgEl.src.endsWith("images/"+fileName)){
-      imgEl.onerror = null;
-      imgEl.src = p2;
-    }
+function setImgSmart(imgEl, fileName){
+  const paths = [
+    `images/${fileName}`,
+    `./images/${fileName}`,
+    fileName,
+    `./${fileName}`
+  ];
+
+  let i = 0;
+  imgEl.onerror = () => {
+    i++;
+    if(i < paths.length) imgEl.src = paths[i];
   };
-  imgEl.src = p1;
+
+  imgEl.src = paths[i];
 }
+
 
 /** ✅ 角色图片文件名（与你 zip 完全一致） */
 function initRoleImages(){
@@ -859,3 +864,4 @@ window.addEventListener('hashchange', ()=>{
 </script>
 </body>
 </html>
+
