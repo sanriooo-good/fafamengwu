@@ -109,6 +109,7 @@
       width:140px; flex:0 0 140px;
       display:flex; flex-direction:column; gap:10px; align-items:center;
     }
+
     .badge{
       width:120px; height:120px;
       border-radius:999px;
@@ -117,7 +118,28 @@
       background:#fff;
       overflow:hidden;
     }
-    .badge img{ width:100%; height:100%; display:block; }
+    /* ✅ 关键：让圆形里的图不变形（裁切填满） */
+    .badge img{
+      width:100%;
+      height:100%;
+      display:block;
+      object-fit: cover;
+    }
+
+    /* ✅ 结果页主角色：最大但不溢出 */
+    .badge.badge-large{
+      width: min(360px, 90vw);
+      height: min(360px, 90vw);
+    }
+
+    /* ✅ 隐藏副人格：小圆图（不抢主视觉） */
+    .badge.badge-sub{
+      width: 72px;
+      height: 72px;
+      border-width: 3px;
+      box-shadow:0 12px 22px rgba(0,0,0,.10);
+      flex: 0 0 auto;
+    }
 
     .divider{ height:12px; }
     .row{ display:flex; gap:10px; margin-top:12px; }
@@ -170,8 +192,12 @@
     }
 
     .resultHeader{
-      display:flex; gap:14px; align-items:center; justify-content:center;
+      display:flex;
+      gap:14px;
+      align-items:center;
+      justify-content:center;
       margin-bottom:10px;
+      flex-wrap: wrap;
     }
     .resultTitle{ font-size:20px; font-weight:1000; margin:0; }
     .tag{
@@ -197,10 +223,19 @@
     .small{ font-size:12px; color:var(--muted); margin-top:10px; line-height:1.6; }
     .center{ text-align:center; }
 
+    .subline{
+      margin-top:6px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap: wrap;
+    }
+
     @media (max-width:520px){
       .hero{ flex-direction:column; }
       .hero .right{ width:100%; flex:1; flex-direction:row; justify-content:flex-start; }
       .badge{ width:96px; height:96px; }
+      .badge.badge-sub{ width:64px; height:64px; }
     }
   </style>
 </head>
@@ -221,13 +256,10 @@
           <h1>测测你更像哪位三丽鸥角色？</h1>
           <div class="sub">
             回答 20 道小问题，系统会给你一个“主角色”+“隐藏副人格”，并生成可分享链接。<br/>
-          
           </div>
           <div class="divider"></div>
           <button class="btn" onclick="start()">开始测试</button>
-          <div class="small">
-           
-          </div>
+          <div class="small"></div>
         </div>
         <div class="right">
           <div class="badge" title="可爱预览">
@@ -260,13 +292,22 @@
     <!-- 结果页 -->
     <div id="result" class="card hide center">
       <div class="resultHeader">
-        <div class="badge" style="width:110px;height:110px;">
+        <!-- ✅ 主角色大图：min(360px, 90vw) -->
+        <div class="badge badge-large">
           <img id="rimg" alt="role" />
         </div>
+
         <div style="text-align:left">
           <div class="chip">你的主角色</div>
           <div class="resultTitle">✨ <span id="rname"></span></div>
-          <div class="small" style="margin-top:6px;">隐藏副人格：<b id="subname"></b></div>
+
+          <!-- ✅ 隐藏副人格：名字 + 小圆图 -->
+          <div class="subline">
+            <div class="small" style="margin-top:0;">隐藏副人格：<b id="subname"></b></div>
+            <div class="badge badge-sub" title="隐藏副人格头像">
+              <img id="subimg" alt="sub role" />
+            </div>
+          </div>
         </div>
       </div>
 
@@ -304,118 +345,10 @@
   </div>
 
 <script>
-/** ====== 可爱 SVG 头像（原创） ====== */
-function svgAvatar({bg="#ffe6f2", accent="#ff5fa2", deco="bow", label="★"}){
-  // 统一的可爱脸 + 不同装饰
-  const decoMap = {
-    bow: `
-      <g transform="translate(92,28)">
-        <path d="M0 14 C10 0, 30 0, 40 14 C30 26,10 26,0 14Z" fill="${accent}" opacity=".95"/>
-        <path d="M46 14 C56 0, 76 0, 86 14 C76 26,56 26,46 14Z" fill="${accent}" opacity=".95"/>
-        <circle cx="43" cy="14" r="8" fill="#fff" opacity=".9"/>
-        <circle cx="43" cy="14" r="4" fill="${accent}" opacity=".9"/>
-      </g>`,
-    hood: `
-      <path d="M70 48 C70 18, 150 18, 150 48 C160 92,150 152,110 160 C70 152,60 92,70 48Z"
-        fill="${accent}" opacity=".92"/>
-      <path d="M78 56 C78 32, 142 32, 142 56 C148 92,140 140,110 146 C80 140,72 92,78 56Z"
-        fill="#fff" opacity=".9"/>`,
-    jester: `
-      <g transform="translate(60,16)">
-        <path d="M50 8 C60 -4, 78 2, 72 18 C66 36,40 36,38 18 C36 10,42 10,50 8Z" fill="${accent}"/>
-        <path d="M0 24 C10 0, 34 0, 42 24 C34 40, 10 40,0 24Z" fill="${accent}" opacity=".92"/>
-        <path d="M78 24 C88 0, 112 0, 120 24 C112 40, 88 40,78 24Z" fill="${accent}" opacity=".92"/>
-        <circle cx="42" cy="24" r="6" fill="#fff" opacity=".95"/>
-        <circle cx="78" cy="24" r="6" fill="#fff" opacity=".95"/>
-      </g>`,
-    ears: `
-      <g transform="translate(58,8)">
-        <path d="M18 0 C0 30, 0 70, 18 98 C30 78,34 34,18 0Z" fill="${accent}" opacity=".9"/>
-        <path d="M144 0 C162 30, 162 70, 144 98 C132 78,128 34,144 0Z" fill="${accent}" opacity=".9"/>
-      </g>`,
-    beret: `
-      <path d="M78 40 C88 18, 132 18, 146 40 C140 56,90 56,78 40Z" fill="${accent}" opacity=".92"/>
-      <circle cx="148" cy="36" r="6" fill="#fff" opacity=".9"/>`,
-    headband: `
-      <path d="M70 54 C84 34, 136 34, 150 54 L150 64 C136 50,84 50,70 64Z" fill="${accent}" opacity=".9"/>
-      <circle cx="110" cy="46" r="7" fill="#fff" opacity=".95"/>`,
-    frog: `
-      <g transform="translate(62,30)">
-        <circle cx="26" cy="18" r="16" fill="${accent}" opacity=".9"/>
-        <circle cx="98" cy="18" r="16" fill="${accent}" opacity=".9"/>
-        <circle cx="26" cy="18" r="7" fill="#fff" opacity=".95"/>
-        <circle cx="98" cy="18" r="7" fill="#fff" opacity=".95"/>
-        <circle cx="26" cy="18" r="3" fill="#222" opacity=".8"/>
-        <circle cx="98" cy="18" r="3" fill="#222" opacity=".8"/>
-      </g>`,
-    spikes: `
-      <g transform="translate(72,18)">
-        <path d="M0 40 L16 10 L32 40 L48 10 L64 40 L80 10 L96 40" fill="none" stroke="${accent}" stroke-width="10" stroke-linecap="round" opacity=".85"/>
-      </g>`,
-    stars: `
-      <g transform="translate(56,22)" opacity=".95">
-        <path d="M18 0 L22 12 L34 12 L24 19 L28 32 L18 24 L8 32 L12 19 L2 12 L14 12Z" fill="${accent}"/>
-        <path d="M126 6 L130 18 L142 18 L132 25 L136 38 L126 30 L116 38 L120 25 L110 18 L122 18Z" fill="${accent}"/>
-      </g>`,
-    egg: `
-      <g transform="translate(84,20)">
-        <ellipse cx="26" cy="30" rx="22" ry="28" fill="#fff" opacity=".95"/>
-        <circle cx="26" cy="34" r="10" fill="${accent}" opacity=".9"/>
-      </g>`,
-    fin: `
-      <g transform="translate(54,64)" opacity=".9">
-        <path d="M0 44 C22 16, 54 16, 76 44 C54 66, 22 66,0 44Z" fill="${accent}"/>
-        <path d="M92 44 C114 16, 146 16, 168 44 C146 66, 114 66,92 44Z" fill="${accent}"/>
-      </g>`,
-    tux: `
-      <g transform="translate(70,126)">
-        <path d="M0 0 C10 22, 30 34, 40 42 C50 34,70 22,80 0" fill="${accent}" opacity=".92"/>
-        <path d="M38 8 L42 8 L44 26 L40 36 L36 26Z" fill="#fff" opacity=".9"/>
-      </g>`
-  };
-
-  const decoSvg = decoMap[deco] || decoMap["bow"];
-
-  const svg = `
-  <svg xmlns="http://www.w3.org/2000/svg" width="220" height="220" viewBox="0 0 220 220">
-    <defs>
-      <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0" stop-color="${bg}"/>
-        <stop offset="1" stop-color="#ffffff"/>
-      </linearGradient>
-      <filter id="s" x="-20%" y="-20%" width="140%" height="140%">
-        <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#000" flood-opacity=".10"/>
-      </filter>
-    </defs>
-
-    <rect x="0" y="0" width="220" height="220" rx="36" fill="url(#g)"/>
-    <circle cx="110" cy="120" r="74" fill="#fff" opacity=".92" filter="url(#s)"/>
-    ${decoSvg}
-
-    <!-- face -->
-    <g transform="translate(0,6)">
-      <ellipse cx="86" cy="122" rx="10" ry="12" fill="#222" opacity=".82"/>
-      <ellipse cx="134" cy="122" rx="10" ry="12" fill="#222" opacity=".82"/>
-      <circle cx="110" cy="140" r="7" fill="${accent}" opacity=".85"/>
-      <path d="M88 152 C96 162, 124 162, 132 152" fill="none" stroke="#222" stroke-width="6" stroke-linecap="round" opacity=".55"/>
-      <circle cx="68" cy="138" r="10" fill="${accent}" opacity=".18"/>
-      <circle cx="152" cy="138" r="10" fill="${accent}" opacity=".18"/>
-    </g>
-
-    <!-- label -->
-    <g opacity=".92">
-      <rect x="20" y="20" width="54" height="30" rx="14" fill="#fff" opacity=".78"/>
-      <text x="47" y="41" text-anchor="middle" font-size="14" font-weight="800" fill="${accent}">${label}</text>
-    </g>
-  </svg>`;
-  return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg.trim());
-}
-
 /** ====== 角色库（12个） ====== */
 const roles = {
   helloKitty: {
     name: "Hello Kitty",
-    avatar: { bg:"#ffe6f2", accent:"#ff5fa2", deco:"bow", label:"KT" },
     desc: "你给人的第一感觉是稳、体面、可靠。你擅长把生活打理得井井有条，也很会照顾别人的感受：不越界、不强迫，但总能在关键时刻提供支持。你对“规则感”和“秩序感”有天然好感，所以在团队里常常是让事情顺利推进的那个人。你并不是冷淡，而是更倾向于用行动表达温柔。偶尔你会因为太能扛而忽略自己的情绪需求，记得给自己也留出被照顾的空间。",
     tags: ["可靠稳重","边界感强","审美在线","稳定输出"],
     hidden: "你的隐藏属性是“安全感制造机”——你一出现，大家就更安心。",
@@ -426,7 +359,6 @@ const roles = {
 
   myMelody: {
     name: "My Melody",
-    avatar: { bg:"#fff1f6", accent:"#ff7bb7", deco:"hood", label:"MM" },
     desc: "你是典型的温柔坚定型：外表软软的，但内心有清晰的原则。你很会共情，能敏锐捕捉到别人的情绪波动，所以你总能在关系里扮演“缓冲垫”和“治愈者”。你喜欢小而确定的幸福——好吃的、好看的、好闻的、可爱的，都能让你回血。你愿意为在乎的人付出，但并不等于讨好：一旦触碰底线，你会悄悄拉开距离。",
     tags: ["治愈系","共情力强","温柔坚定","小幸福收集者"],
     hidden: "你的隐藏属性是“情绪调音师”——你能把刺耳的氛围调成柔软的和声。",
@@ -437,7 +369,6 @@ const roles = {
 
   kuromi: {
     name: "Kuromi",
-    avatar: { bg:"#f2edff", accent:"#6a48ff", deco:"jester", label:"KR" },
     desc: "你是“酷酷的可爱”本人：有主见、敢表达、行动力强，不喜欢被定义或被管着。你看起来很硬气，甚至会用吐槽和玩笑保护自己，但真正亲近的人会知道你其实很重情义、很细腻。你讨厌无意义的规则，更愿意按自己的节奏活。你的魅力在于真实——你不会假装完美，也不怕承认脆弱。",
     tags: ["反差萌","嘴硬心软","个性鲜明","行动派"],
     hidden: "你的隐藏属性是“战斗型浪漫”——你嘴上狠，心里很会爱。",
@@ -448,7 +379,6 @@ const roles = {
 
   cinnamoroll: {
     name: "Cinnamoroll（大耳狗）",
-    avatar: { bg:"#e9f7ff", accent:"#45a7ff", deco:"ears", label:"CN" },
     desc: "你像一朵轻飘飘的云：可爱、友善、很会让氛围变轻松。你天然具备“让人放松”的能力，和你在一起别人会更愿意说真话。你重视陪伴，喜欢温暖的关系和舒服的节奏。你看似随和，其实对“安全感”有很高需求：你可以很外向，也可以突然想躲起来充电。",
     tags: ["氛围组核心","乐观可爱","需要安全感","社交舒适"],
     hidden: "你的隐藏属性是“情绪缓冲垫”——你能让很多人卸下防备。",
@@ -459,7 +389,6 @@ const roles = {
 
   pompompurin: {
     name: "Pompompurin（布丁狗）",
-    avatar: { bg:"#fff6df", accent:"#f3b12b", deco:"beret", label:"PP" },
     desc: "你主打一个“松弛感”和“好相处”。你喜欢舒服的生活方式：好吃的、好睡的、好玩的，能享受也懂得分享。你在关系里很包容，擅长用轻松幽默化解尴尬，是大家都愿意靠近的“软绵绵存在”。你对压力的处理方式是：先把自己照顾好，再慢慢解决问题。",
     tags: ["松弛感","好相处","享受生活","温和幽默"],
     hidden: "你的隐藏属性是“快乐扩散器”——你走到哪，哪里就更轻松。",
@@ -470,7 +399,6 @@ const roles = {
 
   pochacco: {
     name: "Pochacco（帕恰狗）",
-    avatar: { bg:"#eafff3", accent:"#2bd48f", deco:"headband", label:"PC" },
     desc: "你是活力派：爱玩、好奇心强、社交起来很自然。你喜欢新鲜事物，也很愿意带动身边的人一起体验生活。你其实很讲义气，对朋友很真诚，属于“我来我来我顶上”的类型。你不喜欢沉闷的环境，如果太压抑你会想办法把气氛带起来。",
     tags: ["活力值高","真诚仗义","爱探索","气氛担当"],
     hidden: "你的隐藏属性是“超强带动性”——你能让身边人都更愿意行动。",
@@ -481,7 +409,6 @@ const roles = {
 
   keroppi: {
     name: "Keroppi（可洛比/青蛙）",
-    avatar: { bg:"#f0ffea", accent:"#3acb2a", deco:"frog", label:"KP" },
     desc: "你是乐天行动型：能把小事变有趣，也能把困难当成挑战。你对世界保持好奇，喜欢在生活里找“通关感”。你在群体里通常是组织者或点子王：说走就走，说干就干。你讨厌把问题想得太复杂，更相信先做起来。",
     tags: ["乐天派","行动力","点子多","复原力强"],
     hidden: "你的隐藏属性是“困难消化器”——你能把压力变成游戏关卡。",
@@ -492,7 +419,6 @@ const roles = {
 
   badtzMaru: {
     name: "Badtz-Maru（酷企鹅）",
-    avatar: { bg:"#eef2f7", accent:"#222831", deco:"spikes", label:"BM" },
     desc: "你酷得很有态度：不爱迎合，讨厌虚伪，更看重真实和效率。你有强烈的独立性，喜欢按自己的逻辑做事。你对“无意义的社交”和“无效沟通”耐心有限，常常一针见血。你看起来有点难靠近，但熟了会发现你很讲义气、很护短，也很有冷冷的幽默感。",
     tags: ["独立清醒","毒舌但真诚","效率派","酷感审美"],
     hidden: "你的隐藏属性是“反套路智者”——你总能看穿事情的本质。",
@@ -503,7 +429,6 @@ const roles = {
 
   littleTwinStars: {
     name: "Little Twin Stars（双子星）",
-    avatar: { bg:"#f3f0ff", accent:"#8a6cff", deco:"stars", label:"TS" },
     desc: "你浪漫、想象力丰富，对美和梦境有天然感知。你很容易被一首歌、一段光影、一个小细节打动。你不喜欢太现实的压迫感，更愿意相信“温柔的可能性”。你在关系里需要理解和共鸣：能一起做梦，也能一起落地。你的优势是创造力与审美：你能把普通日子过出童话感。",
     tags: ["浪漫主义","想象力","审美感强","温柔细腻"],
     hidden: "你的隐藏属性是“灵感捕手”——你总能把平凡变成好看的故事。",
@@ -514,7 +439,6 @@ const roles = {
 
   gudetama: {
     name: "Gudetama（蛋黄哥）",
-    avatar: { bg:"#fff7e6", accent:"#ffb000", deco:"egg", label:"GD" },
     desc: "你表面摆烂，内心清醒。你对“无意义的努力”极度敏感：更愿意把力气用在真正值得的地方。你擅长把复杂问题一句话讲明白，也很会用幽默化解尴尬。你需要充足的休息与自由空间，一旦被逼得太紧，你会直接关机。选择省电不是懒，而是一种能量管理。",
     tags: ["省电模式","清醒吐槽","怕麻烦","高效率"],
     hidden: "你的隐藏属性是“能量管理大师”——你知道什么时候该用力、什么时候该停。",
@@ -525,7 +449,6 @@ const roles = {
 
   hangyodon: {
     name: "Hangyodon（半鱼人）",
-    avatar: { bg:"#e7fbff", accent:"#00a9c8", deco:"fin", label:"HG" },
     desc: "你是“搞笑外壳+敏感内核”的代表。你喜欢热闹，也擅长制造笑点，但其实很在意别人是否喜欢你。你对氛围很敏感，常常一秒读懂场上的微妙。你会用玩笑掩饰不安，也会在深夜突然多想。你的闪光点是：真诚、有趣、共情力强，而且很愿意为朋友两肋插刀。",
     tags: ["搞笑担当","敏感细腻","反差感","共情力强"],
     hidden: "你的隐藏属性是“氛围雷达”——你能瞬间察觉别人情绪。",
@@ -536,7 +459,6 @@ const roles = {
 
   tuxedosam: {
     name: "Tuxedosam（企鹅山姆）",
-    avatar: { bg:"#eef7ff", accent:"#2d5bff", deco:"tux", label:"TSM" },
     desc: "你有一种“讲究但不矫情”的精致感：重视品质、礼仪和氛围，也希望自己活得体面漂亮。你喜欢可爱和优雅并存的东西，对审美很挑，但你的挑剔是为了更舒服的生活体验。你社交时很会照顾场面，懂得让所有人都不尴尬。你偶尔会有点爱面子，但其实很柔软。",
     tags: ["精致讲究","礼貌体面","审美挑剔","氛围控"],
     hidden: "你的隐藏属性是“场面调度者”——你能把聚会变得高级且舒服。",
@@ -676,11 +598,23 @@ let answers = Array(questions.length).fill(null);
 let scores = {};
 let roleImgs = {};
 
+/** ✅ 用 PNG 文件作为角色图（放在 images/ 文件夹） */
 function initRoleImages(){
-  roleImgs = {};
-  Object.keys(roles).forEach(k=>{
-    roleImgs[k] = svgAvatar(roles[k].avatar);
-  });
+  roleImgs = {
+    helloKitty: "images/01_helloKitty.png",
+    myMelody: "images/02_myMelody.png",
+    kuromi: "images/03_kuromi.png",
+    cinnamoroll: "images/04_cinnamoroll.png",
+    pompompurin: "images/05_pompompurin.png",
+    pochacco: "images/06_pochacco.png",
+    keroppi: "images/07_keroppi.png",
+    badtzMaru: "images/08_badtzMaru.png",
+    littleTwinStars: "images/09_littleTwinStars.png",
+    gudetama: "images/10_gudetama.png",
+    hangyodon: "images/11_hangyodon.png",
+    tuxedosam: "images/12_tuxedosam.png"
+  };
+
   // 首页预览随机一个
   const keys = Object.keys(roles);
   const pick = keys[Math.floor(Math.random()*keys.length)];
@@ -803,6 +737,16 @@ function showResult(mainKeyOverride=null, subKeyOverride=null){
   const subRole = roles[subKey];
   document.getElementById('subname').innerText = subRole ? subRole.name : role.name;
 
+  // ✅ 隐藏副人格对应图片
+  const subImgEl = document.getElementById('subimg');
+  if(subRole && roleImgs[subKey]){
+    subImgEl.src = roleImgs[subKey];
+    subImgEl.alt = subRole.name;
+  }else{
+    subImgEl.src = roleImgs[mainKey];
+    subImgEl.alt = role.name;
+  }
+
   const tagsBox = document.getElementById('rtags');
   tagsBox.innerHTML = "";
   role.tags.forEach(t=>{
@@ -816,7 +760,6 @@ function showResult(mainKeyOverride=null, subKeyOverride=null){
 }
 
 function pickSubFromMain(mainKey){
-  // 分享打开时如果没有 s，就从“最相近”里挑一个（按同类气质简单映射）
   const map = {
     helloKitty:"tuxedosam",
     myMelody:"cinnamoroll",
