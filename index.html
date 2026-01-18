@@ -1,12 +1,330 @@
-<!DOCTYPE html>
-<html lang="zh">
+<!doctype html>
+<html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>我的第一个网页</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>三丽鸥角色测试</title>
+  <style>
+    :root{
+      --bg:#fff7fb;
+      --card:#ffffff;
+      --text:#222;
+      --muted:#666;
+      --primary:#ff5fa2;
+      --border:#f2d7e5;
+    }
+    body{
+      margin:0; font-family: -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+      background: var(--bg); color: var(--text);
+    }
+    .wrap{ max-width:720px; margin:0 auto; padding:20px 14px 60px; }
+    .card{
+      background:var(--card); border:1px solid var(--border); border-radius:16px;
+      padding:18px; box-shadow:0 10px 30px rgba(0,0,0,.06);
+    }
+    h1{ margin:0 0 8px; font-size:22px; }
+    .sub{ color:var(--muted); font-size:14px; line-height:1.6; }
+    .btn{
+      width:100%; border:0; border-radius:14px; padding:14px 16px;
+      background:var(--primary); color:#fff; font-size:16px; font-weight:700;
+      cursor:pointer;
+    }
+    .btn.secondary{ background:#fff; color:var(--primary); border:1px solid var(--border); }
+    .qhead{ display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+    .pill{ font-size:12px; padding:6px 10px; border-radius:999px; background:#fff; border:1px solid var(--border); color:var(--muted); }
+    .question{ font-size:18px; font-weight:800; margin:6px 0 12px; }
+    .opt{
+      display:block; width:100%; text-align:left; padding:14px 14px; margin:10px 0;
+      border-radius:14px; border:1px solid var(--border); background:#fff; cursor:pointer;
+      font-size:15px; line-height:1.4;
+    }
+    .opt:hover{ border-color: #ffc1da; }
+    .row{ display:flex; gap:10px; margin-top:12px; }
+    .row .btn{ flex:1; }
+    .resultTitle{ font-size:20px; font-weight:900; margin:0 0 8px; }
+    .tag{ display:inline-block; margin:6px 6px 0 0; padding:6px 10px; border-radius:999px; background:#fff; border:1px solid var(--border); font-size:12px; color:var(--muted); }
+    .small{ font-size:12px; color:var(--muted); margin-top:10px; }
+    .center{ text-align:center; }
+    .hide{ display:none; }
+    img.avatar{ width:120px; height:120px; object-fit:cover; border-radius:999px; border:3px solid #fff; box-shadow:0 10px 24px rgba(0,0,0,.10); }
+  </style>
 </head>
 <body>
-  <h1>Hello, world!</h1>
-  <p>这是我的 index.html</p>
+  <div class="wrap">
+    <!-- 首页 -->
+    <div id="home" class="card">
+      <h1>三丽鸥家族 · 角色测试</h1>
+      <div class="sub">回答几个小问题，看看你更像哪位三丽鸥角色～（支持生成分享链接）</div>
+      <div style="height:14px"></div>
+      <button class="btn" onclick="start()">开始测试</button>
+      <div class="small">提示：如果你想做成“像你给的那个链接”一样，我也可以把结果页做成更炫的海报式分享图。</div>
+    </div>
+
+    <!-- 题目页 -->
+    <div id="quiz" class="card hide">
+      <div class="qhead">
+        <div class="pill" id="progress">第 1/8 题</div>
+        <div class="pill" id="hint">选择最符合的一项</div>
+      </div>
+      <div class="question" id="qtext"></div>
+      <div id="options"></div>
+      <div class="row">
+        <button class="btn secondary" onclick="prev()">上一题</button>
+        <button class="btn" onclick="next()">下一题</button>
+      </div>
+    </div>
+
+    <!-- 结果页 -->
+    <div id="result" class="card hide center">
+      <div class="resultTitle">你的角色是：<span id="rname"></span></div>
+      <div style="height:10px"></div>
+      <img id="rimg" class="avatar" src="" alt="role" />
+      <div style="height:12px"></div>
+      <div class="sub" id="rdesc"></div>
+      <div style="height:10px"></div>
+      <div id="rtags"></div>
+      <div style="height:16px"></div>
+      <button class="btn" onclick="copyLink()">复制结果链接</button>
+      <div style="height:10px"></div>
+      <button class="btn secondary" onclick="restart()">再测一次</button>
+      <div class="small" id="linkTip"></div>
+    </div>
+  </div>
+
+<script>
+/** 角色库：你可以换成三丽鸥的官方图/自制图 */
+const roles = {
+  kitty: {
+    name: "Hello Kitty",
+    img: "https://images.unsplash.com/photo-1543852786-1cf6624b9987?w=400&q=80", // 占位图：换成你想用的
+    desc: "你温柔、体面、有边界感。你不一定最吵闹，但你很可靠，常常是朋友的“定海神针”。",
+    tags: ["温柔稳重", "体贴", "审美在线", "人缘很好"]
+  },
+  mymelody: {
+    name: "My Melody",
+    img: "https://images.unsplash.com/photo-1518791841217-8f162f1e1131?w=400&q=80",
+    desc: "你柔软又有韧性，愿意照顾身边人的感受。你看起来好说话，但其实很有原则。",
+    tags: ["治愈系", "共情力强", "小幸福收集者", "善良但不软弱"]
+  },
+  kuromi: {
+    name: "Kuromi",
+    img: "https://images.unsplash.com/photo-1546182990-dffeafbe841d?w=400&q=80",
+    desc: "你有主见、敢表达，喜欢“酷酷的可爱”。外表强势但内心细腻，爱憎分明超真实。",
+    tags: ["反差萌", "嘴硬心软", "行动派", "很会自嘲"]
+  },
+  cinnamoroll: {
+    name: "Cinnamoroll",
+    img: "https://images.unsplash.com/photo-1537151625747-768eb6cf92b2?w=400&q=80",
+    desc: "你像一朵软云：很会让氛围变轻松。你重视陪伴，适合在温暖的关系里发光。",
+    tags: ["软萌", "乐观", "需要安全感", "气氛组核心"]
+  },
+  gudetama: {
+    name: "Gudetama",
+    img: "https://images.unsplash.com/photo-1543852786-1cf6624b9987?w=400&q=80",
+    desc: "你表面摆烂，内心清醒。你对世界的洞察很准，只是不想浪费力气在无意义的事情上。",
+    tags: ["摆烂哲学", "清醒", "怕麻烦", "效率至上"]
+  }
+};
+
+/** 题目库（示例 8 题） */
+const questions = [
+  {
+    q: "周末最想做什么？",
+    opts: [
+      { t:"宅家追剧+点甜品", score:{ cinnamoroll:2, gudetama:2, mymelody:1 }},
+      { t:"逛街拍照买可爱物", score:{ kitty:2, mymelody:2 }},
+      { t:"去密室/展览/新奇体验", score:{ kuromi:2, kitty:1 }},
+      { t:"都行，看心情", score:{ gudetama:2, cinnamoroll:1 }}
+    ]
+  },
+  {
+    q: "朋友突然约你出门，你：",
+    opts: [
+      { t:"立刻答应：走！", score:{ kuromi:2, cinnamoroll:1 }},
+      { t:"先看日程再决定", score:{ kitty:2 }},
+      { t:"想去，但会纠结要不要出门", score:{ mymelody:2 }},
+      { t:"能线上就线上吧", score:{ gudetama:2 }}
+    ]
+  },
+  {
+    q: "你最在意别人怎么评价你？",
+    opts: [
+      { t:"可靠、有分寸", score:{ kitty:2 }},
+      { t:"可爱、温柔", score:{ mymelody:2, cinnamoroll:1 }},
+      { t:"有个性、不随波逐流", score:{ kuromi:2 }},
+      { t:"别烦我，我挺好的", score:{ gudetama:2 }}
+    ]
+  },
+  {
+    q: "压力大时你会：",
+    opts: [
+      { t:"制定计划，逐个解决", score:{ kitty:2 }},
+      { t:"找人聊聊，想要被安慰", score:{ mymelody:2 }},
+      { t:"先冲一波再说", score:{ kuromi:2 }},
+      { t:"先躺会儿，等恢复", score:{ gudetama:2, cinnamoroll:1 }}
+    ]
+  },
+  {
+    q: "你最擅长的社交方式：",
+    opts: [
+      { t:"倾听+照顾情绪", score:{ mymelody:2 }},
+      { t:"维持礼貌距离", score:{ kitty:2 }},
+      { t:"搞笑活跃气氛", score:{ cinnamoroll:2 }},
+      { t:"毒舌吐槽但很真诚", score:{ kuromi:2 }}
+    ]
+  },
+  {
+    q: "你对生活的态度更像：",
+    opts: [
+      { t:"努力把日子过得漂亮", score:{ kitty:2 }},
+      { t:"小而确定的幸福最重要", score:{ mymelody:2 }},
+      { t:"想怎样就怎样，爽最重要", score:{ kuromi:2 }},
+      { t:"别太认真，开心就好", score:{ gudetama:2, cinnamoroll:1 }}
+    ]
+  },
+  {
+    q: "你最受不了：",
+    opts: [
+      { t:"没礼貌/越界的人", score:{ kitty:2 }},
+      { t:"争吵和冷漠", score:{ mymelody:2 }},
+      { t:"被管着做事", score:{ kuromi:2 }},
+      { t:"无意义的加班与内耗", score:{ gudetama:2 }}
+    ]
+  },
+  {
+    q: "如果给自己一句tag：",
+    opts: [
+      { t:"#稳定输出", score:{ kitty:2 }},
+      { t:"#温柔坚定", score:{ mymelody:2 }},
+      { t:"#酷但可爱", score:{ kuromi:2 }},
+      { t:"#省电模式", score:{ gudetama:2 }}
+    ]
+  }
+];
+
+let idx = 0;
+let answers = Array(questions.length).fill(null);
+let scores = {};
+
+function resetScores(){
+  scores = {};
+  Object.keys(roles).forEach(k => scores[k]=0);
+}
+resetScores();
+
+function start(){
+  document.getElementById('home').classList.add('hide');
+  document.getElementById('quiz').classList.remove('hide');
+  idx=0;
+  render();
+}
+
+function render(){
+  document.getElementById('progress').innerText = `第 ${idx+1}/${questions.length} 题`;
+  document.getElementById('qtext').innerText = questions[idx].q;
+  const box = document.getElementById('options');
+  box.innerHTML = "";
+  questions[idx].opts.forEach((o, i)=>{
+    const btn = document.createElement('button');
+    btn.className = "opt";
+    btn.innerText = o.t;
+    btn.onclick = ()=>choose(i);
+    if(answers[idx]===i) btn.style.borderColor = "#ff9cc5";
+    box.appendChild(btn);
+  });
+}
+
+function choose(i){
+  answers[idx]=i;
+  render();
+}
+
+function prev(){
+  if(idx>0){ idx--; render(); }
+}
+
+function next(){
+  if(answers[idx]===null){
+    alert("请选择一个选项～");
+    return;
+  }
+  if(idx<questions.length-1){
+    idx++; render();
+  }else{
+    calc();
+    showResult();
+  }
+}
+
+function calc(){
+  resetScores();
+  questions.forEach((qq, qi)=>{
+    const pick = answers[qi];
+    const sc = qq.opts[pick].score;
+    Object.keys(sc).forEach(k => scores[k] += sc[k]);
+  });
+}
+
+function showResult(){
+  document.getElementById('quiz').classList.add('hide');
+  document.getElementById('result').classList.remove('hide');
+
+  const bestKey = Object.keys(scores).sort((a,b)=>scores[b]-scores[a])[0];
+  const role = roles[bestKey];
+
+  // 写入 URL hash，便于分享
+  location.hash = `#r=${bestKey}`;
+
+  document.getElementById('rname').innerText = role.name;
+  document.getElementById('rimg').src = role.img;
+  document.getElementById('rdesc').innerText = role.desc;
+
+  const tagsBox = document.getElementById('rtags');
+  tagsBox.innerHTML = "";
+  role.tags.forEach(t=>{
+    const span = document.createElement('span');
+    span.className = "tag";
+    span.innerText = t;
+    tagsBox.appendChild(span);
+  });
+}
+
+function copyLink(){
+  const url = location.href;
+  navigator.clipboard.writeText(url).then(()=>{
+    document.getElementById('linkTip').innerText = "已复制！发给朋友就能直接打开你的结果～";
+  });
+}
+
+function restart(){
+  location.hash="";
+  answers = Array(questions.length).fill(null);
+  resetScores();
+  document.getElementById('result').classList.add('hide');
+  document.getElementById('home').classList.remove('hide');
+  document.getElementById('linkTip').innerText = "";
+}
+
+/** 如果用户打开的是带结果的链接，直接展示结果 */
+window.addEventListener('load', ()=>{
+  const m = location.hash.match(/r=([a-z0-9_]+)/i);
+  if(m && roles[m[1]]){
+    document.getElementById('home').classList.add('hide');
+    document.getElementById('result').classList.remove('hide');
+    const role = roles[m[1]];
+    document.getElementById('rname').innerText = role.name;
+    document.getElementById('rimg').src = role.img;
+    document.getElementById('rdesc').innerText = role.desc;
+    const tagsBox = document.getElementById('rtags');
+    tagsBox.innerHTML = "";
+    role.tags.forEach(t=>{
+      const span = document.createElement('span');
+      span.className = "tag";
+      span.innerText = t;
+      tagsBox.appendChild(span);
+    });
+  }
+});
+</script>
 </body>
 </html>
