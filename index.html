@@ -109,7 +109,6 @@
       width:140px; flex:0 0 140px;
       display:flex; flex-direction:column; gap:10px; align-items:center;
     }
-
     .badge{
       width:120px; height:120px;
       border-radius:999px;
@@ -117,34 +116,8 @@
       box-shadow:0 16px 30px rgba(0,0,0,.10);
       background:#fff;
       overflow:hidden;
-      display:flex;
-      align-items:center;
-      justify-content:center;
     }
-
-    /* ✅ 关键：不裁切（contain），避免你说的“格式不对” */
-    .badge img{
-      width:100%;
-      height:100%;
-      display:block;
-      object-fit: contain;   /* ← 不裁切 */
-      background:#fff;       /* 透明边缘也好看 */
-    }
-
-    /* ✅ 结果页主角色：最大但不溢出 */
-    .badge.badge-large{
-      width: min(360px, 90vw);
-      height: min(360px, 90vw);
-    }
-
-    /* ✅ 隐藏副人格：小圆图 */
-    .badge.badge-sub{
-      width: 72px;
-      height: 72px;
-      border-width: 3px;
-      box-shadow:0 12px 22px rgba(0,0,0,.10);
-      flex: 0 0 auto;
-    }
+    .badge img{ width:100%; height:100%; display:block; object-fit:cover; }
 
     .divider{ height:12px; }
     .row{ display:flex; gap:10px; margin-top:12px; }
@@ -197,12 +170,8 @@
     }
 
     .resultHeader{
-      display:flex;
-      gap:14px;
-      align-items:center;
-      justify-content:center;
+      display:flex; gap:14px; align-items:center; justify-content:center;
       margin-bottom:10px;
-      flex-wrap: wrap;
     }
     .resultTitle{ font-size:20px; font-weight:1000; margin:0; }
     .tag{
@@ -228,19 +197,10 @@
     .small{ font-size:12px; color:var(--muted); margin-top:10px; line-height:1.6; }
     .center{ text-align:center; }
 
-    .subline{
-      margin-top:6px;
-      display:flex;
-      align-items:center;
-      gap:10px;
-      flex-wrap: wrap;
-    }
-
     @media (max-width:520px){
       .hero{ flex-direction:column; }
       .hero .right{ width:100%; flex:1; flex-direction:row; justify-content:flex-start; }
       .badge{ width:96px; height:96px; }
-      .badge.badge-sub{ width:64px; height:64px; }
     }
   </style>
 </head>
@@ -261,10 +221,13 @@
           <h1>测测你更像哪位三丽鸥角色？</h1>
           <div class="sub">
             回答 20 道小问题，系统会给你一个“主角色”+“隐藏副人格”，并生成可分享链接。<br/>
+            你只要把 12 张图片放到 <b>./images/</b> 文件夹即可。
           </div>
           <div class="divider"></div>
           <button class="btn" onclick="start()">开始测试</button>
-          <div class="small"></div>
+          <div class="small">
+            图片命名规则：<code>images/helloKitty.png</code>、<code>images/myMelody.png</code> ……（下面已全部填好）。
+          </div>
         </div>
         <div class="right">
           <div class="badge" title="可爱预览">
@@ -297,20 +260,13 @@
     <!-- 结果页 -->
     <div id="result" class="card hide center">
       <div class="resultHeader">
-        <div class="badge badge-large">
+        <div class="badge" style="width:110px;height:110px;">
           <img id="rimg" alt="role" />
         </div>
-
         <div style="text-align:left">
           <div class="chip">你的主角色</div>
           <div class="resultTitle">✨ <span id="rname"></span></div>
-
-          <div class="subline">
-            <div class="small" style="margin-top:0;">隐藏副人格：<b id="subname"></b></div>
-            <div class="badge badge-sub" title="隐藏副人格头像">
-              <img id="subimg" alt="sub role" />
-            </div>
-          </div>
+          <div class="small" style="margin-top:6px;">隐藏副人格：<b id="subname"></b></div>
         </div>
       </div>
 
@@ -348,10 +304,45 @@
   </div>
 
 <script>
-/** ====== 角色库（12个） ====== */
+/** ====== 图片兜底占位（可爱占位图SVG） ====== */
+function placeholderDataUrl(label="IMG"){
+  const svg = `
+  <svg xmlns="http://www.w3.org/2000/svg" width="220" height="220" viewBox="0 0 220 220">
+    <defs>
+      <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#fff2f8"/>
+        <stop offset="1" stop-color="#f0f7ff"/>
+      </linearGradient>
+      <filter id="s" x="-20%" y="-20%" width="140%" height="140%">
+        <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#000" flood-opacity=".10"/>
+      </filter>
+    </defs>
+    <rect width="220" height="220" rx="36" fill="url(#g)"/>
+    <circle cx="110" cy="118" r="74" fill="#fff" opacity=".92" filter="url(#s)"/>
+    <circle cx="84" cy="116" r="10" fill="#222" opacity=".75"/>
+    <circle cx="136" cy="116" r="10" fill="#222" opacity=".75"/>
+    <circle cx="110" cy="136" r="7" fill="#ff5fa2" opacity=".7"/>
+    <path d="M88 150 C98 162, 122 162, 132 150" fill="none" stroke="#222" stroke-width="6" stroke-linecap="round" opacity=".5"/>
+    <rect x="24" y="24" width="56" height="30" rx="14" fill="#fff" opacity=".8"/>
+    <text x="52" y="44" text-anchor="middle" font-size="14" font-weight="800" fill="#ff5fa2">${label}</text>
+  </svg>`;
+  return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg.trim());
+}
+
+/** 给 <img> 设置 src，失败则用占位图 */
+function setImgSafe(imgEl, src, label){
+  imgEl.onerror = () => {
+    imgEl.onerror = null;
+    imgEl.src = placeholderDataUrl(label);
+  };
+  imgEl.src = src;
+}
+
+/** ====== 角色库（12个）— 已填好 imageUrl ====== */
 const roles = {
   helloKitty: {
     name: "Hello Kitty",
+    imageUrl: "./images/helloKitty.png",
     desc: "你给人的第一感觉是稳、体面、可靠。你擅长把生活打理得井井有条，也很会照顾别人的感受：不越界、不强迫，但总能在关键时刻提供支持。你对“规则感”和“秩序感”有天然好感，所以在团队里常常是让事情顺利推进的那个人。你并不是冷淡，而是更倾向于用行动表达温柔。偶尔你会因为太能扛而忽略自己的情绪需求，记得给自己也留出被照顾的空间。",
     tags: ["可靠稳重","边界感强","审美在线","稳定输出"],
     hidden: "你的隐藏属性是“安全感制造机”——你一出现，大家就更安心。",
@@ -359,8 +350,10 @@ const roles = {
     avoid: "最怕：没礼貌、越界、反复无常的人。",
     recharge: "收拾房间/整理计划、喝热饮、逛文具店或安静做手作。"
   },
+
   myMelody: {
     name: "My Melody",
+    imageUrl: "./images/myMelody.png",
     desc: "你是典型的温柔坚定型：外表软软的，但内心有清晰的原则。你很会共情，能敏锐捕捉到别人的情绪波动，所以你总能在关系里扮演“缓冲垫”和“治愈者”。你喜欢小而确定的幸福——好吃的、好看的、好闻的、可爱的，都能让你回血。你愿意为在乎的人付出，但并不等于讨好：一旦触碰底线，你会悄悄拉开距离。",
     tags: ["治愈系","共情力强","温柔坚定","小幸福收集者"],
     hidden: "你的隐藏属性是“情绪调音师”——你能把刺耳的氛围调成柔软的和声。",
@@ -368,8 +361,10 @@ const roles = {
     avoid: "最怕：冷暴力、情绪勒索、忽冷忽热。",
     recharge: "甜品、香薰/热水澡、和亲近的人慢慢聊天、逛可爱小店。"
   },
+
   kuromi: {
     name: "Kuromi",
+    imageUrl: "./images/kuromi.png",
     desc: "你是“酷酷的可爱”本人：有主见、敢表达、行动力强，不喜欢被定义或被管着。你看起来很硬气，甚至会用吐槽和玩笑保护自己，但真正亲近的人会知道你其实很重情义、很细腻。你讨厌无意义的规则，更愿意按自己的节奏活。你的魅力在于真实——你不会假装完美，也不怕承认脆弱。",
     tags: ["反差萌","嘴硬心软","个性鲜明","行动派"],
     hidden: "你的隐藏属性是“战斗型浪漫”——你嘴上狠，心里很会爱。",
@@ -377,8 +372,10 @@ const roles = {
     avoid: "最怕：控制欲强、道德绑架、PUA式说教。",
     recharge: "运动/大声唱歌、短途出走、买一件让你变酷的小东西。"
   },
+
   cinnamoroll: {
     name: "Cinnamoroll（大耳狗）",
+    imageUrl: "./images/cinnamoroll.png",
     desc: "你像一朵轻飘飘的云：可爱、友善、很会让氛围变轻松。你天然具备“让人放松”的能力，和你在一起别人会更愿意说真话。你重视陪伴，喜欢温暖的关系和舒服的节奏。你看似随和，其实对“安全感”有很高需求：你可以很外向，也可以突然想躲起来充电。",
     tags: ["氛围组核心","乐观可爱","需要安全感","社交舒适"],
     hidden: "你的隐藏属性是“情绪缓冲垫”——你能让很多人卸下防备。",
@@ -386,8 +383,10 @@ const roles = {
     avoid: "最怕：吵闹冲突、被忽视、关系不确定。",
     recharge: "睡饱、抱抱、看轻松综艺/动漫、喝甜咖啡或奶茶。"
   },
+
   pompompurin: {
     name: "Pompompurin（布丁狗）",
+    imageUrl: "./images/pompompurin.png",
     desc: "你主打一个“松弛感”和“好相处”。你喜欢舒服的生活方式：好吃的、好睡的、好玩的，能享受也懂得分享。你在关系里很包容，擅长用轻松幽默化解尴尬，是大家都愿意靠近的“软绵绵存在”。你对压力的处理方式是：先把自己照顾好，再慢慢解决问题。",
     tags: ["松弛感","好相处","享受生活","温和幽默"],
     hidden: "你的隐藏属性是“快乐扩散器”——你走到哪，哪里就更轻松。",
@@ -395,8 +394,10 @@ const roles = {
     avoid: "最怕：高压逼迫、无休止争论、过度较真。",
     recharge: "好好吃一顿、午睡、散步晒太阳、抱着枕头发呆。"
   },
+
   pochacco: {
     name: "Pochacco（帕恰狗）",
+    imageUrl: "./images/pochacco.png",
     desc: "你是活力派：爱玩、好奇心强、社交起来很自然。你喜欢新鲜事物，也很愿意带动身边的人一起体验生活。你其实很讲义气，对朋友很真诚，属于“我来我来我顶上”的类型。你不喜欢沉闷的环境，如果太压抑你会想办法把气氛带起来。",
     tags: ["活力值高","真诚仗义","爱探索","气氛担当"],
     hidden: "你的隐藏属性是“超强带动性”——你能让身边人都更愿意行动。",
@@ -404,8 +405,10 @@ const roles = {
     avoid: "最怕：拖拖拉拉、扫兴、否定你的热情。",
     recharge: "运动、约朋友、玩游戏、尝试新餐厅或新路线。"
   },
+
   keroppi: {
     name: "Keroppi（可洛比/青蛙）",
+    imageUrl: "./images/keroppi.png",
     desc: "你是乐天行动型：能把小事变有趣，也能把困难当成挑战。你对世界保持好奇，喜欢在生活里找“通关感”。你在群体里通常是组织者或点子王：说走就走，说干就干。你讨厌把问题想得太复杂，更相信先做起来。",
     tags: ["乐天派","行动力","点子多","复原力强"],
     hidden: "你的隐藏属性是“困难消化器”——你能把压力变成游戏关卡。",
@@ -413,8 +416,10 @@ const roles = {
     avoid: "最怕：过度悲观、过度控制、一直说不行。",
     recharge: "户外、音乐、运动、和朋友做点“很无聊但很快乐”的事。"
   },
+
   badtzMaru: {
     name: "Badtz-Maru（酷企鹅）",
+    imageUrl: "./images/badtzMaru.png",
     desc: "你酷得很有态度：不爱迎合，讨厌虚伪，更看重真实和效率。你有强烈的独立性，喜欢按自己的逻辑做事。你对“无意义的社交”和“无效沟通”耐心有限，常常一针见血。你看起来有点难靠近，但熟了会发现你很讲义气、很护短，也很有冷冷的幽默感。",
     tags: ["独立清醒","毒舌但真诚","效率派","酷感审美"],
     hidden: "你的隐藏属性是“反套路智者”——你总能看穿事情的本质。",
@@ -422,8 +427,10 @@ const roles = {
     avoid: "最怕：道德绑架、假大空、低效扯皮。",
     recharge: "一个人待着、听歌、打游戏、做自己喜欢的冷门爱好。"
   },
+
   littleTwinStars: {
     name: "Little Twin Stars（双子星）",
+    imageUrl: "./images/littleTwinStars.png",
     desc: "你浪漫、想象力丰富，对美和梦境有天然感知。你很容易被一首歌、一段光影、一个小细节打动。你不喜欢太现实的压迫感，更愿意相信“温柔的可能性”。你在关系里需要理解和共鸣：能一起做梦，也能一起落地。你的优势是创造力与审美：你能把普通日子过出童话感。",
     tags: ["浪漫主义","想象力","审美感强","温柔细腻"],
     hidden: "你的隐藏属性是“灵感捕手”——你总能把平凡变成好看的故事。",
@@ -431,8 +438,10 @@ const roles = {
     avoid: "最怕：粗暴现实、嘲笑梦想、情绪压迫。",
     recharge: "听歌、看展/看星空、写点东西、整理灵感相册。"
   },
+
   gudetama: {
     name: "Gudetama（蛋黄哥）",
+    imageUrl: "./images/gudetama.png",
     desc: "你表面摆烂，内心清醒。你对“无意义的努力”极度敏感：更愿意把力气用在真正值得的地方。你擅长把复杂问题一句话讲明白，也很会用幽默化解尴尬。你需要充足的休息与自由空间，一旦被逼得太紧，你会直接关机。选择省电不是懒，而是一种能量管理。",
     tags: ["省电模式","清醒吐槽","怕麻烦","高效率"],
     hidden: "你的隐藏属性是“能量管理大师”——你知道什么时候该用力、什么时候该停。",
@@ -440,8 +449,10 @@ const roles = {
     avoid: "最怕：无意义加班、情绪绑架、被催促。",
     recharge: "睡觉、发呆、漫画/短视频、把待办清空只留一件事。"
   },
+
   hangyodon: {
     name: "Hangyodon（半鱼人）",
+    imageUrl: "./images/hangyodon.png",
     desc: "你是“搞笑外壳+敏感内核”的代表。你喜欢热闹，也擅长制造笑点，但其实很在意别人是否喜欢你。你对氛围很敏感，常常一秒读懂场上的微妙。你会用玩笑掩饰不安，也会在深夜突然多想。你的闪光点是：真诚、有趣、共情力强，而且很愿意为朋友两肋插刀。",
     tags: ["搞笑担当","敏感细腻","反差感","共情力强"],
     hidden: "你的隐藏属性是“氛围雷达”——你能瞬间察觉别人情绪。",
@@ -449,8 +460,10 @@ const roles = {
     avoid: "最怕：被嘲笑、被忽视、被当成只会搞笑的人。",
     recharge: "和懂你的人聊天、看喜剧、写点心事、吃点热乎的。"
   },
+
   tuxedosam: {
     name: "Tuxedosam（企鹅山姆）",
+    imageUrl: "./images/tuxedosam.png",
     desc: "你有一种“讲究但不矫情”的精致感：重视品质、礼仪和氛围，也希望自己活得体面漂亮。你喜欢可爱和优雅并存的东西，对审美很挑，但你的挑剔是为了更舒服的生活体验。你社交时很会照顾场面，懂得让所有人都不尴尬。你偶尔会有点爱面子，但其实很柔软。",
     tags: ["精致讲究","礼貌体面","审美挑剔","氛围控"],
     hidden: "你的隐藏属性是“场面调度者”——你能把聚会变得高级且舒服。",
@@ -588,52 +601,18 @@ const questions = [
 let idx = 0;
 let answers = Array(questions.length).fill(null);
 let scores = {};
-let roleImgs = {};
 
-function setImgSmart(imgEl, fileName){
-  const paths = [
-    `images/${fileName}`,
-    `./images/${fileName}`,
-    fileName,
-    `./${fileName}`
-  ];
-
-  let i = 0;
-  imgEl.onerror = () => {
-    i++;
-    if(i < paths.length) imgEl.src = paths[i];
-  };
-
-  imgEl.src = paths[i];
-}
-
-
-/** ✅ 角色图片文件名（与你 zip 完全一致） */
-function initRoleImages(){
-  roleImgs = {
-    helloKitty: "01_helloKitty.png",
-    myMelody: "02_myMelody.png",
-    kuromi: "03_kuromi.png",
-    cinnamoroll: "04_cinnamoroll.png",
-    pompompurin: "05_pompompurin.png",
-    pochacco: "06_pochacco.png",
-    keroppi: "07_keroppi.png",
-    badtzMaru: "08_badtzMaru.png",
-    littleTwinStars: "09_littleTwinStars.png",
-    gudetama: "10_gudetama.png",
-    hangyodon: "11_hangyodon.png",
-    tuxedosam: "12_tuxedosam.png"
-  };
-
-  const keys = Object.keys(roles);
-  const pick = keys[Math.floor(Math.random()*keys.length)];
-  setImgWithFallback(document.getElementById("previewImg"), roleImgs[pick]);
-}
-initRoleImages();
+/** ====== 图片 key 列表（用于随机预览） ====== */
+const roleKeys = Object.keys(roles);
 
 function resetScores(){
   scores = {};
-  Object.keys(roles).forEach(k => scores[k] = 0);
+  roleKeys.forEach(k => scores[k] = 0);
+}
+
+function initPreview(){
+  const pick = roleKeys[Math.floor(Math.random() * roleKeys.length)];
+  setImgSafe(document.getElementById("previewImg"), roles[pick].imageUrl, pick.toUpperCase().slice(0,3));
 }
 
 function start(){
@@ -716,53 +695,6 @@ function pickMainAndSub(){
   return { mainKey, subKey };
 }
 
-function showResult(mainKeyOverride=null, subKeyOverride=null){
-  document.getElementById('quiz').classList.add('hide');
-  document.getElementById('home').classList.add('hide');
-  document.getElementById('result').classList.remove('hide');
-
-  let mainKey, subKey;
-  if(mainKeyOverride && roles[mainKeyOverride]){
-    mainKey = mainKeyOverride;
-    subKey = (subKeyOverride && roles[subKeyOverride]) ? subKeyOverride : pickSubFromMain(mainKey);
-  }else{
-    ({ mainKey, subKey } = pickMainAndSub());
-  }
-
-  location.hash = `#r=${encodeURIComponent(mainKey)}&s=${encodeURIComponent(subKey)}`;
-
-  const role = roles[mainKey];
-  document.getElementById('rname').innerText = role.name;
-
-  // ✅ 主角色图（自动回退路径）
-  setImgWithFallback(document.getElementById('rimg'), roleImgs[mainKey]);
-
-  document.getElementById('rdesc').innerText = role.desc;
-  document.getElementById('rhidden').innerText = role.hidden;
-  document.getElementById('rbest').innerText = role.bestMatch;
-  document.getElementById('ravoid').innerText = role.avoid;
-  document.getElementById('rrecharge').innerText = role.recharge;
-
-  const subRole = roles[subKey];
-  document.getElementById('subname').innerText = subRole ? subRole.name : role.name;
-
-  // ✅ 隐藏副人格图（自动回退路径）
-  const subImgEl = document.getElementById('subimg');
-  setImgWithFallback(subImgEl, roleImgs[subKey] || roleImgs[mainKey]);
-  subImgEl.alt = subRole ? subRole.name : role.name;
-
-  const tagsBox = document.getElementById('rtags');
-  tagsBox.innerHTML = "";
-  role.tags.forEach(t=>{
-    const span = document.createElement('span');
-    span.className = "tag";
-    span.innerText = t;
-    tagsBox.appendChild(span);
-  });
-
-  document.getElementById('linkTip').innerText = "";
-}
-
 function pickSubFromMain(mainKey){
   const map = {
     helloKitty:"tuxedosam",
@@ -781,14 +713,53 @@ function pickSubFromMain(mainKey){
   return map[mainKey] || mainKey;
 }
 
+function showResult(mainKeyOverride=null, subKeyOverride=null){
+  document.getElementById('quiz').classList.add('hide');
+  document.getElementById('home').classList.add('hide');
+  document.getElementById('result').classList.remove('hide');
+
+  let mainKey, subKey;
+  if(mainKeyOverride && roles[mainKeyOverride]){
+    mainKey = mainKeyOverride;
+    subKey = (subKeyOverride && roles[subKeyOverride]) ? subKeyOverride : pickSubFromMain(mainKey);
+  }else{
+    ({ mainKey, subKey } = pickMainAndSub());
+  }
+
+  location.hash = `#r=${encodeURIComponent(mainKey)}&s=${encodeURIComponent(subKey)}`;
+
+  const role = roles[mainKey];
+  document.getElementById('rname').innerText = role.name;
+
+  setImgSafe(document.getElementById('rimg'), role.imageUrl, mainKey.toUpperCase().slice(0,3));
+
+  document.getElementById('rdesc').innerText = role.desc;
+  document.getElementById('rhidden').innerText = role.hidden;
+  document.getElementById('rbest').innerText = role.bestMatch;
+  document.getElementById('ravoid').innerText = role.avoid;
+  document.getElementById('rrecharge').innerText = role.recharge;
+
+  const subRole = roles[subKey];
+  document.getElementById('subname').innerText = subRole ? subRole.name : role.name;
+
+  const tagsBox = document.getElementById('rtags');
+  tagsBox.innerHTML = "";
+  role.tags.forEach(t=>{
+    const span = document.createElement('span');
+    span.className = "tag";
+    span.innerText = t;
+    tagsBox.appendChild(span);
+  });
+
+  document.getElementById('linkTip').innerText = "";
+}
+
 function copyLink(){
   const url = location.href;
   if(navigator.clipboard && navigator.clipboard.writeText){
     navigator.clipboard.writeText(url).then(()=>{
       document.getElementById('linkTip').innerText = "已复制！把链接发给朋友，他们打开就能直接看到你的结果～";
-    }).catch(()=>{
-      fallbackCopy(url);
-    });
+    }).catch(()=>fallbackCopy(url));
   }else{
     fallbackCopy(url);
   }
@@ -803,7 +774,7 @@ function fallbackCopy(text){
     document.execCommand('copy');
     document.getElementById('linkTip').innerText = "已复制！把链接发给朋友就行～";
   }catch(e){
-    document.getElementById('linkTip').innerText = "复制失败了：请手动复制地址栏链接。";
+    document.getElementById('linkTip').innerText = "复制失败：请手动复制地址栏链接。";
   }
   document.body.removeChild(ta);
 }
@@ -828,9 +799,10 @@ function restart(){
   document.getElementById('quiz').classList.add('hide');
   document.getElementById('home').classList.remove('hide');
   document.getElementById('linkTip').innerText = "";
-  initRoleImages();
+  initPreview();
 }
 
+/** ====== Hash 解析（分享链接直接展示结果） ====== */
 function parseHash(){
   const h = (location.hash || "").replace(/^#/, "");
   if(!h) return {};
@@ -845,12 +817,9 @@ function parseHash(){
 }
 
 window.addEventListener('load', ()=>{
-  initRoleImages();
+  initPreview();
   const { r, s } = parseHash();
   if(r && roles[r]){
-    document.getElementById('home').classList.add('hide');
-    document.getElementById('quiz').classList.add('hide');
-    document.getElementById('result').classList.remove('hide');
     showResult(r, s);
   }
 });
@@ -864,4 +833,3 @@ window.addEventListener('hashchange', ()=>{
 </script>
 </body>
 </html>
-
